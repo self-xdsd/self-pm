@@ -8,7 +8,7 @@ decrypt:
   secring.gpg: "repo/rcfg/secring.gpg.asc"
 merge:
   script: |-
-    mvn clean install --settings /home/r/settings.xml
+    mvn clean install -Pcheckstyle --settings /home/r/settings.xml
 deploy:
   script: |-
     echo 'Nothing to deploy yet'
