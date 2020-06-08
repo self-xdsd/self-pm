@@ -15,7 +15,9 @@
 	<description>Project Manager in Self</description>
 
 	<properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
+        <self.core.version>0.0.3</self.core.version>
 	</properties>
 
 	<dependencies>
@@ -23,6 +25,17 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+
+        <dependency>
+            <groupId>com.selfxdsd</groupId>
+            <artifactId>self-api</artifactId>
+            <version>${self.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.selfxdsd</groupId>
+            <artifactId>self-core-impl</artifactId>
+            <version>${self.core.version}</version>
+        </dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -147,4 +160,11 @@
             </distributionManagement>
         </profile>
     </profiles>
+    <repositories>
+        <repository>
+            <id>github</id>
+            <name>Self Core on Github Packages</name>
+            <url>https://maven.pkg.github.com/self-xdsd/self-core</url>
+        </repository>
+    </repositories>
 </project>
