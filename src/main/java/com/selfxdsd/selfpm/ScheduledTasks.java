@@ -22,6 +22,9 @@
  */
 package com.selfxdsd.selfpm;
 
+import com.selfxdsd.core.SelfCore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +40,7 @@ import java.time.LocalDateTime;
  */
 @Component
 public final class ScheduledTasks {
+    private static final Logger log = LoggerFactory.getLogger(ScheduledTasks.class);
 
     /**
      * Every 10 minutes the PMs should verify their
@@ -44,7 +48,7 @@ public final class ScheduledTasks {
      */
     @Scheduled(fixedRate = 5000)
     public void acceptInvitations() {
-        System.out.println("TIME NOW IS: " + LocalDateTime.now());
+        log.info("TIME NOW IS: " + LocalDateTime.now());
     }
 
 }
