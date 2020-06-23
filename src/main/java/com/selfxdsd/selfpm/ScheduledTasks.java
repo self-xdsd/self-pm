@@ -22,27 +22,29 @@
  */
 package com.selfxdsd.selfpm;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 /**
- * Entry point for SpringBoot.
+ * Scheduled tasks that the PMs have to perform periodically.
+ * For instance, checking the Provider invitations and accepting
+ * them.
  * @author Mihai Andronache (amihaiemil@gmail.com)
  * @version $Id$
- * @since 0.0.1
- * @checkstyle HideUtilityClassConstructor (100 lines)
+ * @since 0.0.4
  */
-@SpringBootApplication
-@EnableScheduling
-public class SelfPmApplication {
+@Component
+public final class ScheduledTasks {
 
     /**
-     * Main method entry point.
-     * @param args Command-line arguments.
+     * Every 10 minutes the PMs should verify their
+     * Invitations and accept them.
      */
-    public static void main(final String[] args) {
-        SpringApplication.run(SelfPmApplication.class, args);
+    @Scheduled(fixedRate = 5000)
+    public void acceptInvitations() {
+        System.out.println("TIME NOW IS: " + LocalDateTime.now());
     }
 
 }
