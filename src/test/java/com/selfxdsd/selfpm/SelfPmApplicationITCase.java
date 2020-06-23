@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * @since 0.0.1
  */
 @SpringBootTest
-class SelfPmApplicationTests {
+class SelfPmApplicationITCase {
 
     /**
      * See if the app starts.

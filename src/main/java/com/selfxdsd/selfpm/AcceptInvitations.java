@@ -22,33 +22,72 @@
  */
 package com.selfxdsd.selfpm;
 
-import com.selfxdsd.core.SelfCore;
+import com.selfxdsd.api.Invitation;
+import com.selfxdsd.api.Invitations;
+import com.selfxdsd.api.ProjectManager;
+import com.selfxdsd.api.Self;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 /**
- * Scheduled tasks that the PMs have to perform periodically.
- * For instance, checking the Provider invitations and accepting
- * them.
+ * Each PM will periodically check their repo Invitations and accept any
+ * they might have received.
  * @author Mihai Andronache (amihaiemil@gmail.com)
  * @version $Id$
  * @since 0.0.4
  */
 @Component
-public final class ScheduledTasks {
-    private static final Logger log = LoggerFactory.getLogger(ScheduledTasks.class);
+public final class AcceptInvitations {
+
+    /**
+     * The PMs will verify their invitations every 10 minutes.
+     */
+    private static final int EVERY_10_MINUTES = 600000;
+
+    /**
+     * Logger.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(
+        AcceptInvitations.class
+    );
+
+    /**
+     * Self's core.
+     */
+    private final Self selfCore;
+
+    /**
+     * Ctor.
+     * @param selfCode Self Core, injected by Spring automatically.
+     */
+    @Autowired
+    public AcceptInvitations(final Self selfCode) {
+        this.selfCore = selfCode;
+    }
 
     /**
      * Every 10 minutes the PMs should verify their
      * Invitations and accept them.
      */
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = EVERY_10_MINUTES)
     public void acceptInvitations() {
-        log.info("TIME NOW IS: " + LocalDateTime.now());
+        LOG.debug("Checking invitations of PMs...");
+        for(final ProjectManager manager : this.selfCore.projectManagers()) {
+            final Invitations invitations = manager.provider().invitations();
+            for(final Invitation invitation : invitations) {
+                LOG.debug(
+                    manager.username()
+                    + " accepting Invitation "
+                    + invitation.json()
+                );
+                invitation.accept();
+                LOG.debug("Invitation accepted.");
+            }
+        }
+        LOG.debug("Done.");
     }
 
 }
