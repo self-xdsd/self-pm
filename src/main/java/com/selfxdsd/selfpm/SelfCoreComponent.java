@@ -22,27 +22,44 @@
  */
 package com.selfxdsd.selfpm;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import com.selfxdsd.api.Login;
+import com.selfxdsd.api.ProjectManagers;
+import com.selfxdsd.api.Self;
+import com.selfxdsd.api.User;
+import com.selfxdsd.core.SelfCore;
+import com.selfxdsd.storage.MySql;
+import com.selfxdsd.storage.SelfJooq;
+import org.springframework.stereotype.Component;
 
 /**
- * Entry point for SpringBoot.
+ * Self Core component.
  * @author Mihai Andronache (amihaiemil@gmail.com)
  * @version $Id$
- * @since 0.0.1
- * @checkstyle HideUtilityClassConstructor (100 lines)
+ * @since 0.0.4
  */
-@SpringBootApplication
-@EnableScheduling
-public class SelfPmApplication {
+@Component
+public final class SelfCoreComponent implements Self {
 
     /**
-     * Main method entry point.
-     * @param args Command-line arguments.
+     * Self's core.
      */
-    public static void main(final String[] args) {
-        SpringApplication.run(SelfPmApplication.class, args);
+    private final Self core = new SelfCore(
+        new SelfJooq(
+            new MySql(
+                System.getenv("db.url"),
+                System.getenv("db.user"),
+                System.getenv("db.password")
+            )
+        )
+    );
+
+    @Override
+    public User login(final Login login) {
+        return this.core.login(login);
     }
 
+    @Override
+    public ProjectManagers projectManagers() {
+        return this.core.projectManagers();
+    }
 }
