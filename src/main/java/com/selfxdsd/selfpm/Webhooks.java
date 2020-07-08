@@ -22,6 +22,8 @@
  */
 package com.selfxdsd.selfpm;
 
+import com.selfxdsd.api.Project;
+import com.selfxdsd.api.Provider;
 import com.selfxdsd.api.Self;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -36,9 +38,6 @@ import java.io.StringReader;
  * @author Mihai Andronache (amihaiemil@gmail.com)
  * @version $Id$
  * @since 0.0.2
- * @todo #14:30min Continue implementing the github webhook endpoint
- *  once we can access the Projects in self-core. At the moment, we
- *  can only access them if we log in.
  */
 @RestController
 public final class Webhooks {
@@ -64,6 +63,7 @@ public final class Webhooks {
      * @param secret Secret sent by Github.
      * @param payload JSON Payload.
      * @return ResponseEntity.
+     * @checkstyle ReturnCount (70 lines)
      */
     @PostMapping(
         value = "/github/{owner}/{name}",
@@ -75,14 +75,24 @@ public final class Webhooks {
         final @RequestHeader("X-Hub-Signature") String secret,
         final @RequestBody String payload
     ) {
-        System.out.println(owner);
-        System.out.println(name);
-        System.out.println(secret);
-        System.out.println(
-            Json.createReader(
-                new StringReader(payload)
-            ).readObject()
-        );
+        try {
+            final Project project = this.selfCore.projects().getProjectById(
+                owner + "/" + name,
+                Provider.Names.GITHUB
+            );
+            if (project != null) {
+                project.resolve(
+                    Json.createReader(
+                        new StringReader(payload)
+                    ).readObject(),
+                    secret
+                );
+            } else {
+                return ResponseEntity.noContent().build();
+            }
+        } catch (final IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok().build();
     }
 
