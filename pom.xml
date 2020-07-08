@@ -17,7 +17,7 @@
 	<properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
-        <self.core.version>0.0.7</self.core.version>
+        <self.core.version>0.0.8</self.core.version>
         <self.storage.version>0.0.3</self.storage.version>
 	</properties>
 
@@ -25,7 +25,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-            <!--Exclide JACKSON, since we're going to use JSONB for json.-->
+            <!--Exclude JACKSON, since we're going to use JSONB for json.-->
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>

@@ -22,10 +22,7 @@
  */
 package com.selfxdsd.selfpm;
 
-import com.selfxdsd.api.Login;
-import com.selfxdsd.api.ProjectManagers;
-import com.selfxdsd.api.Self;
-import com.selfxdsd.api.User;
+import com.selfxdsd.api.*;
 import com.selfxdsd.core.SelfCore;
 import com.selfxdsd.storage.MySql;
 import com.selfxdsd.storage.SelfJooq;
@@ -61,5 +58,15 @@ public final class SelfCoreComponent implements Self {
     @Override
     public ProjectManagers projectManagers() {
         return this.core.projectManagers();
+    }
+
+    @Override
+    public Projects projects() {
+        return this.core.projects();
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.core.close();
     }
 }
