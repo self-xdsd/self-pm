@@ -22,6 +22,8 @@
  */
 package com.selfxdsd.selfpm;
 
+import com.selfxdsd.api.Self;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +36,26 @@ import java.io.StringReader;
  * @author Mihai Andronache (amihaiemil@gmail.com)
  * @version $Id$
  * @since 0.0.2
+ * @todo #14:30min Continue implementing the github webhook endpoint
+ *  once we can access the Projects in self-core. At the moment, we
+ *  can only access them if we log in.
  */
 @RestController
 public final class Webhooks {
+
+    /**
+     * Self's core.
+     */
+    private final Self selfCore;
+
+    /**
+     * Ctor.
+     * @param selfCore Self Core, injected by Spring automatically.
+     */
+    @Autowired
+    public Webhooks(final Self selfCore) {
+        this.selfCore = selfCore;
+    }
 
     /**
      * Webhook for Github projects.
