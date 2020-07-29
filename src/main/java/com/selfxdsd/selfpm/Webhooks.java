@@ -69,9 +69,6 @@ public final class Webhooks {
      * @param payload JSON Payload.
      * @return ResponseEntity.
      * @checkstyle ReturnCount (150 lines)
-     * @todo #24:30min Build up the Event based on the payload
-     *  and "event" header (see Github docs) and send it to the
-     *  Project to be resolved (at the moment, null is sent).
      */
     @PostMapping(
         value = "/github/{owner}/{name}",
