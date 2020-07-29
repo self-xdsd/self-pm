@@ -30,8 +30,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.json.Json;
 import java.io.StringReader;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Formatter;
 
 /**
  * Webhook endpoints.
@@ -60,10 +65,14 @@ public final class Webhooks {
      * Webhook for Github projects.
      * @param owner Owner's username (can be a user or organization name).
      * @param name Repo's name.
-     * @param secret Secret sent by Github.
+     * @param signature Signature sent by Github.
      * @param payload JSON Payload.
      * @return ResponseEntity.
      * @checkstyle ReturnCount (70 lines)
+     * @todo #21:30min We need to modify self-core so that Project
+     *  has the method String :: webHookToken(). Also, method Project.resolve
+     *  should not expect the secret anymore. After that is done, modify
+     *  this method accordingly.
      */
     @PostMapping(
         value = "/github/{owner}/{name}",
@@ -72,28 +81,57 @@ public final class Webhooks {
     public ResponseEntity<Void> github(
         final @PathVariable("owner") String owner,
         final @PathVariable("name") String name,
-        final @RequestHeader("X-Hub-Signature") String secret,
+        final @RequestHeader("X-Hub-Signature") String signature,
         final @RequestBody String payload
     ) {
-        try {
-            final Project project = this.selfCore.projects().getProjectById(
-                owner + "/" + name,
-                Provider.Names.GITHUB
+        final Project project = this.selfCore.projects().getProjectById(
+            owner + "/" + name,
+            Provider.Names.GITHUB
+        );
+        if (project != null) {
+            final String calculated = this.hmacHexDigest(
+                "project_wh_token",
+                payload
             );
-            if (project != null) {
+            if(calculated != null && calculated.equals(signature)) {
                 project.resolve(
                     Json.createReader(
                         new StringReader(payload)
                     ).readObject(),
-                    secret
+                    signature
                 );
             } else {
-                return ResponseEntity.noContent().build();
+                return ResponseEntity.badRequest().build();
             }
-        } catch (final IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().build();
+        } else {
+            return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Calculate the Hmac SHA1 digest.
+     * @param key Key.
+     * @param body Data to digest.
+     * @return Hex HmacSHA1 digest.
+     */
+    private String hmacHexDigest(final String key, final String body) {
+        try {
+            final String algorithm = "HmacSHA1";
+            final Mac mac = Mac.getInstance(algorithm);
+            mac.init(
+                new SecretKeySpec(
+                    key.getBytes(),
+                    algorithm
+                )
+            );
+            final Formatter formatter = new Formatter();
+            for (final byte bite : mac.doFinal(body.getBytes())) {
+                formatter.format("%02x", bite);
+            }
+            return formatter.toString();
+        } catch (final NoSuchAlgorithmException | InvalidKeyException ex) {
+            return null;
+        }
+    }
 }

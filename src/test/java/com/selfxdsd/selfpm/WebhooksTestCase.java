@@ -63,12 +63,11 @@ public final class WebhooksTestCase {
     }
 
     /**
-     * If the project complains about the received event
-     * (e.g. secret does not match), the hook should return
-     * 400 BAD REQUEST.
+     * If the project signature does not match,
+     * the hook should return 400 BAD REQUEST.
      */
     @Test
-    public void githubProjectBadRequest() {
+    public void githubProjectBadSignature() {
         final Project project = Mockito.mock(Project.class);
         Mockito.doThrow(IllegalArgumentException.class)
             .when(project)
@@ -81,8 +80,12 @@ public final class WebhooksTestCase {
         Mockito.when(self.projects()).thenReturn(all);
         final Webhooks hook = new Webhooks(self);
         MatcherAssert.assertThat(
-            hook.github("john", "test", "s3cr3t", "{\"json\":\"payload\"}")
-                .getStatusCode(),
+            hook.github(
+                "john",
+                "test",
+                "bad5aaa92d16d7b03dbd25bba34053bd3c3ef",
+                "{\"json\":\"payload\"}"
+            ).getStatusCode(),
             Matchers.equalTo(HttpStatus.BAD_REQUEST)
         );
     }
@@ -104,8 +107,12 @@ public final class WebhooksTestCase {
         Mockito.when(self.projects()).thenReturn(all);
         final Webhooks hook = new Webhooks(self);
         MatcherAssert.assertThat(
-            hook.github("john", "test", "s3cr3t", "{\"json\":\"payload\"}")
-                .getStatusCode(),
+            hook.github(
+                "john",
+                "test",
+                "9317695aaa92d16d7b03dbd25bba34053bd3c3ef",
+                "{\"json\":\"payload\"}"
+            ).getStatusCode(),
             Matchers.equalTo(HttpStatus.OK)
         );
     }
