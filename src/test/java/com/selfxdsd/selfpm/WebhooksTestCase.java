@@ -51,7 +51,7 @@ public final class WebhooksTestCase {
         Mockito.when(self.projects()).thenReturn(all);
         final Webhooks hook = new Webhooks(self);
         MatcherAssert.assertThat(
-            hook.github("john", "test", "s3cr3t", "payload")
+            hook.github("john", "test", "issues", "90sdwdf8w9", "payload")
                 .getStatusCode(),
             Matchers.equalTo(HttpStatus.NO_CONTENT)
         );
@@ -79,6 +79,7 @@ public final class WebhooksTestCase {
             hook.github(
                 "john",
                 "test",
+                "issues",
                 "bad5aaa92d16d7b03dbd25bba34053bd3c3ef",
                 "{\"json\":\"payload\"}"
             ).getStatusCode(),
@@ -107,6 +108,7 @@ public final class WebhooksTestCase {
             hook.github(
                 "john",
                 "test",
+                "issues",
                 "9317695aaa92d16d7b03dbd25bba34053bd3c3ef",
                 "{\"json\":\"payload\"}"
             ).getStatusCode(),

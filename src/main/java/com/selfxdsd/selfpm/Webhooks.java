@@ -22,9 +22,7 @@
  */
 package com.selfxdsd.selfpm;
 
-import com.selfxdsd.api.Project;
-import com.selfxdsd.api.Provider;
-import com.selfxdsd.api.Self;
+import com.selfxdsd.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +30,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.json.Json;
+import javax.json.JsonObject;
+import java.io.StringReader;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
@@ -63,10 +64,11 @@ public final class Webhooks {
      * Webhook for Github projects.
      * @param owner Owner's username (can be a user or organization name).
      * @param name Repo's name.
+     * @param type Event type.
      * @param signature Signature sent by Github.
      * @param payload JSON Payload.
      * @return ResponseEntity.
-     * @checkstyle ReturnCount (70 lines)
+     * @checkstyle ReturnCount (150 lines)
      * @todo #24:30min Build up the Event based on the payload
      *  and "event" header (see Github docs) and send it to the
      *  Project to be resolved (at the moment, null is sent).
@@ -78,6 +80,7 @@ public final class Webhooks {
     public ResponseEntity<Void> github(
         final @PathVariable("owner") String owner,
         final @PathVariable("name") String name,
+        final @RequestHeader("X-GitHub-Event") String type,
         final @RequestHeader("X-Hub-Signature") String signature,
         final @RequestBody String payload
     ) {
@@ -91,7 +94,42 @@ public final class Webhooks {
                 payload
             );
             if(calculated != null && calculated.equals(signature)) {
-                project.resolve(null);
+                project.resolve(
+                    new Event() {
+                        /**
+                         * Event payload.
+                         */
+                        private final JsonObject event = Json.createReader(
+                            new StringReader(payload)
+                        ).readObject();
+
+                        @Override
+                        public String type() {
+                            return type;
+                        }
+
+                        @Override
+                        public Issue issue() {
+                            return project.projectManager().provider().repo(
+                                owner + "/" + name
+                            ).issues().received(
+                                this.event.getJsonObject("issue")
+                            );
+                        }
+
+                        @Override
+                        public Comment comment() {
+                            return this.issue().comments().received(
+                                this.event.getJsonObject("comment")
+                            );
+                        }
+
+                        @Override
+                        public Project project() {
+                            return project;
+                        }
+                    }
+                );
             } else {
                 return ResponseEntity.badRequest().build();
             }
