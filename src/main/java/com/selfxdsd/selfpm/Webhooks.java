@@ -32,8 +32,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.json.Json;
-import java.io.StringReader;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
@@ -69,10 +67,9 @@ public final class Webhooks {
      * @param payload JSON Payload.
      * @return ResponseEntity.
      * @checkstyle ReturnCount (70 lines)
-     * @todo #21:30min We need to modify self-core so that Project
-     *  has the method String :: webHookToken(). Also, method Project.resolve
-     *  should not expect the secret anymore. After that is done, modify
-     *  this method accordingly.
+     * @todo #24:30min Build up the Event based on the payload
+     *  and "event" header (see Github docs) and send it to the
+     *  Project to be resolved (at the moment, null is sent).
      */
     @PostMapping(
         value = "/github/{owner}/{name}",
@@ -90,16 +87,11 @@ public final class Webhooks {
         );
         if (project != null) {
             final String calculated = this.hmacHexDigest(
-                "project_wh_token",
+                project.webHookToken(),
                 payload
             );
             if(calculated != null && calculated.equals(signature)) {
-                project.resolve(
-                    Json.createReader(
-                        new StringReader(payload)
-                    ).readObject(),
-                    signature
-                );
+                project.resolve(null);
             } else {
                 return ResponseEntity.badRequest().build();
             }

@@ -22,17 +22,12 @@
  */
 package com.selfxdsd.selfpm;
 
-import com.selfxdsd.api.Project;
-import com.selfxdsd.api.Projects;
-import com.selfxdsd.api.Provider;
-import com.selfxdsd.api.Self;
+import com.selfxdsd.api.*;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
-
-import javax.json.JsonObject;
 
 /**
  * Unit tests for {@link Webhooks}.
@@ -69,9 +64,10 @@ public final class WebhooksTestCase {
     @Test
     public void githubProjectBadSignature() {
         final Project project = Mockito.mock(Project.class);
-        Mockito.doThrow(IllegalArgumentException.class)
+        Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.doThrow(IllegalStateException.class)
             .when(project)
-            .resolve(Mockito.any(JsonObject.class), Mockito.anyString());
+            .resolve(Mockito.any(Event.class));
         final Projects all = Mockito.mock(Projects.class);
         Mockito.when(
             all.getProjectById("john/test", Provider.Names.GITHUB)
@@ -96,9 +92,10 @@ public final class WebhooksTestCase {
     @Test
     public void githubProjectResolvesOk() {
         final Project project = Mockito.mock(Project.class);
+        Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
         Mockito.doNothing()
             .when(project)
-            .resolve(Mockito.any(JsonObject.class), Mockito.anyString());
+            .resolve(Mockito.any(Event.class));
         final Projects all = Mockito.mock(Projects.class);
         Mockito.when(
             all.getProjectById("john/test", Provider.Names.GITHUB)
