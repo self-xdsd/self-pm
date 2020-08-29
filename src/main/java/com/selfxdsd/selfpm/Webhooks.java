@@ -108,7 +108,7 @@ public final class Webhooks {
                         @Override
                         public Issue issue() {
                             return project.projectManager().provider().repo(
-                                owner + "/" + name
+                                owner, name
                             ).issues().received(
                                 this.event.getJsonObject("issue")
                             );
