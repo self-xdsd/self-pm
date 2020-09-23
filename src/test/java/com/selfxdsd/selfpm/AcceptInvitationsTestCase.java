@@ -23,7 +23,7 @@
 package com.selfxdsd.selfpm;
 
 import com.selfxdsd.api.*;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
