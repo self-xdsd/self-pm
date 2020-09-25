@@ -43,9 +43,9 @@ public final class SelfCoreComponent implements Self {
     private final Self core = new SelfCore(
         new SelfJooq(
             new MySql(
-                System.getenv("db.url"),
-                System.getenv("db.user"),
-                System.getenv("db.password")
+                System.getenv("self_db_url"),
+                System.getenv("self_db_user"),
+                System.getenv("self_db_password")
             )
         )
     );
