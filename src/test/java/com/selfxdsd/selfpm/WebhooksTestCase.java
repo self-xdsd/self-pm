@@ -26,6 +26,7 @@ import com.selfxdsd.api.*;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 
@@ -113,6 +114,158 @@ public final class WebhooksTestCase {
                 "{\"json\":\"payload\"}"
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.OK)
+        );
+    }
+
+    /**
+     * A Github project resolves a "newIssue" event.
+     */
+    @Test
+    public void githubProjectResolvesNewIssue() {
+        final Project project = Mockito.mock(Project.class);
+        Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.doNothing()
+            .when(project)
+            .resolve(Mockito.any(Event.class));
+        final Projects all = Mockito.mock(Projects.class);
+        Mockito.when(
+            all.getProjectById("john/test", Provider.Names.GITHUB)
+        ).thenReturn(project);
+        final Self self = Mockito.mock(Self.class);
+        Mockito.when(self.projects()).thenReturn(all);
+        final Webhooks hook = new Webhooks(self);
+        MatcherAssert.assertThat(
+            hook.github(
+                "john",
+                "test",
+                "issues",
+                "900ac3dbf2d5f8d4923c1d65615289763689ef93",
+                "{\"action\":\"opened\"}"
+            ).getStatusCode(),
+            Matchers.equalTo(HttpStatus.OK)
+        );
+
+        final ArgumentCaptor<Event> event = ArgumentCaptor.forClass(
+            Event.class
+        );
+        Mockito.verify(project, Mockito.times(1)).resolve(event.capture());
+        MatcherAssert.assertThat(
+            event.getValue().type(),
+            Matchers.equalTo("newIssue")
+        );
+    }
+
+    /**
+     * A Github project resolves a "reopened" issue event.
+     */
+    @Test
+    public void githubProjectResolvesReopenedIssue() {
+        final Project project = Mockito.mock(Project.class);
+        Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.doNothing()
+            .when(project)
+            .resolve(Mockito.any(Event.class));
+        final Projects all = Mockito.mock(Projects.class);
+        Mockito.when(
+            all.getProjectById("john/test", Provider.Names.GITHUB)
+        ).thenReturn(project);
+        final Self self = Mockito.mock(Self.class);
+        Mockito.when(self.projects()).thenReturn(all);
+        final Webhooks hook = new Webhooks(self);
+        MatcherAssert.assertThat(
+            hook.github(
+                "john",
+                "test",
+                "issues",
+                "5ad785edd6a587a36fc5f687eeb6780b6bc1199d",
+                "{\"action\":\"reopened\"}"
+            ).getStatusCode(),
+            Matchers.equalTo(HttpStatus.OK)
+        );
+
+        final ArgumentCaptor<Event> event = ArgumentCaptor.forClass(
+            Event.class
+        );
+        Mockito.verify(project, Mockito.times(1)).resolve(event.capture());
+        MatcherAssert.assertThat(
+            event.getValue().type(),
+            Matchers.equalTo("reopened")
+        );
+    }
+
+    /**
+     * A Github project resolves a "reopened" event.
+     */
+    @Test
+    public void githubProjectResolvesOtherIssuesEvent() {
+        final Project project = Mockito.mock(Project.class);
+        Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.doNothing()
+            .when(project)
+            .resolve(Mockito.any(Event.class));
+        final Projects all = Mockito.mock(Projects.class);
+        Mockito.when(
+            all.getProjectById("john/test", Provider.Names.GITHUB)
+        ).thenReturn(project);
+        final Self self = Mockito.mock(Self.class);
+        Mockito.when(self.projects()).thenReturn(all);
+        final Webhooks hook = new Webhooks(self);
+        MatcherAssert.assertThat(
+            hook.github(
+                "john",
+                "test",
+                "issues",
+                "e07549de7e41046bba98fdd5cd02b38990b114f3",
+                "{\"action\":\"other\"}"
+            ).getStatusCode(),
+            Matchers.equalTo(HttpStatus.OK)
+        );
+
+        final ArgumentCaptor<Event> event = ArgumentCaptor.forClass(
+            Event.class
+        );
+        Mockito.verify(project, Mockito.times(1)).resolve(event.capture());
+        MatcherAssert.assertThat(
+            event.getValue().type(),
+            Matchers.equalTo("issues")
+        );
+    }
+
+    /**
+     * A Github project resolves an "issue_comment" event.
+     */
+    @Test
+    public void githubProjectResolvesIssueCommentEvent() {
+        final Project project = Mockito.mock(Project.class);
+        Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.doNothing()
+            .when(project)
+            .resolve(Mockito.any(Event.class));
+        final Projects all = Mockito.mock(Projects.class);
+        Mockito.when(
+            all.getProjectById("john/test", Provider.Names.GITHUB)
+        ).thenReturn(project);
+        final Self self = Mockito.mock(Self.class);
+        Mockito.when(self.projects()).thenReturn(all);
+        final Webhooks hook = new Webhooks(self);
+        MatcherAssert.assertThat(
+            hook.github(
+                "john",
+                "test",
+                "issue_comment",
+                "9a4f065f84a3a28d68aad1b40bd946f79fe6d588",
+                "{\"action\":\"edited\"}"
+            ).getStatusCode(),
+            Matchers.equalTo(HttpStatus.OK)
+        );
+
+        final ArgumentCaptor<Event> event = ArgumentCaptor.forClass(
+            Event.class
+        );
+        Mockito.verify(project, Mockito.times(1)).resolve(event.capture());
+        MatcherAssert.assertThat(
+            event.getValue().type(),
+            Matchers.equalTo("issue_comment")
         );
     }
 }
