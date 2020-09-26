@@ -102,7 +102,20 @@ public final class Webhooks {
 
                         @Override
                         public String type() {
-                            return type;
+                            final String resolved;
+                            if("issues".equalsIgnoreCase(type)) {
+                                final String act = event.getString("action");
+                                if("opened".equalsIgnoreCase(act)) {
+                                    resolved = "newIssue";
+                                } else if ("reopened".equalsIgnoreCase(act)){
+                                    resolved = "reopened";
+                                } else {
+                                    resolved = type;
+                                }
+                            } else {
+                                resolved = type;
+                            }
+                            return resolved;
                         }
 
                         @Override
