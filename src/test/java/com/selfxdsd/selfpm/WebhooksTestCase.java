@@ -110,7 +110,7 @@ public final class WebhooksTestCase {
                 "john",
                 "test",
                 "issues",
-                "9317695aaa92d16d7b03dbd25bba34053bd3c3ef",
+                "sha1=9317695aaa92d16d7b03dbd25bba34053bd3c3ef",
                 "{\"json\":\"payload\"}"
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.OK)
@@ -139,7 +139,7 @@ public final class WebhooksTestCase {
                 "john",
                 "test",
                 "issues",
-                "900ac3dbf2d5f8d4923c1d65615289763689ef93",
+                "sha1=900ac3dbf2d5f8d4923c1d65615289763689ef93",
                 "{\"action\":\"opened\"}"
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.OK)
@@ -177,7 +177,7 @@ public final class WebhooksTestCase {
                 "john",
                 "test",
                 "issues",
-                "5ad785edd6a587a36fc5f687eeb6780b6bc1199d",
+                "sha1=5ad785edd6a587a36fc5f687eeb6780b6bc1199d",
                 "{\"action\":\"reopened\"}"
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.OK)
@@ -215,7 +215,7 @@ public final class WebhooksTestCase {
                 "john",
                 "test",
                 "issues",
-                "e07549de7e41046bba98fdd5cd02b38990b114f3",
+                "sha1=e07549de7e41046bba98fdd5cd02b38990b114f3",
                 "{\"action\":\"other\"}"
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.OK)
@@ -253,7 +253,7 @@ public final class WebhooksTestCase {
                 "john",
                 "test",
                 "issue_comment",
-                "9a4f065f84a3a28d68aad1b40bd946f79fe6d588",
+                "sha1=9a4f065f84a3a28d68aad1b40bd946f79fe6d588",
                 "{\"action\":\"edited\"}"
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.OK)

@@ -96,14 +96,13 @@ public final class Webhooks {
             Provider.Names.GITHUB
         );
         if (project != null) {
-            LOG.debug("RECEIVED SIG: " + signature);
-            LOG.debug("WEBHOOK TOKEN: " + project.webHookToken());
+            LOG.debug("RECEIVED SIGNATURE: " + signature);
             final String calculated = this.hmacHexDigest(
                 project.webHookToken(),
                 payload
             );
-            LOG.debug("CALCULATED SIG: " + calculated);
-            if(calculated != null && calculated.equals(signature)) {
+            LOG.debug("CALCULATED SIGNATURE: sha1=" + calculated);
+            if(calculated != null && ("sha1="+calculated).equals(signature)) {
                 project.resolve(
                     new Event() {
                         /**
