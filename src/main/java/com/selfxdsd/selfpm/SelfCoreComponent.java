@@ -66,6 +66,11 @@ public final class SelfCoreComponent implements Self {
     }
 
     @Override
+    public Contributors contributors() {
+        return this.core.contributors();
+    }
+
+    @Override
     public void close() throws Exception {
         this.core.close();
     }
