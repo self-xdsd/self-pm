@@ -23,6 +23,8 @@
 package com.selfxdsd.selfpm;
 
 import com.selfxdsd.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +47,14 @@ import java.util.Formatter;
  */
 @RestController
 public final class Webhooks {
+
+    /**
+     * Logger.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(
+        Webhooks.class
+    );
+
 
     /**
      * Self's core.
@@ -86,10 +96,13 @@ public final class Webhooks {
             Provider.Names.GITHUB
         );
         if (project != null) {
+            LOG.debug("RECEIVED SIG: " + signature);
+            LOG.debug("WEBHOOK TOKEN: " + project.webHookToken());
             final String calculated = this.hmacHexDigest(
                 project.webHookToken(),
                 payload
             );
+            LOG.debug("CALCULATED SIG: " + calculated);
             if(calculated != null && calculated.equals(signature)) {
                 project.resolve(
                     new Event() {
