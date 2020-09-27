@@ -96,6 +96,7 @@ public final class Webhooks {
             Provider.Names.GITHUB
         );
         if (project != null) {
+            LOG.debug("PAYLOAD: " + payload);
             LOG.debug("RECEIVED SIGNATURE: " + signature);
             final String calculated = this.hmacHexDigest(
                 project.webHookToken(),
