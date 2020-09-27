@@ -101,8 +101,9 @@ public final class Webhooks {
                 project.webHookToken(),
                 payload
             );
-            LOG.debug("CALCULATED SIGNATURE: sha1=" + calculated);
-            if(calculated != null && ("sha1="+calculated).equals(signature)) {
+            LOG.debug("TOKEN: " + project.webHookToken());
+            LOG.debug("CALCULATED SIGNATURE: " + calculated);
+            if(calculated != null && calculated.equals(signature)) {
                 project.resolve(
                     new Event() {
                         /**
@@ -181,7 +182,7 @@ public final class Webhooks {
             for (final byte bite : mac.doFinal(body.getBytes())) {
                 formatter.format("%02x", bite);
             }
-            return formatter.toString();
+            return "sha1=" + formatter.toString();
         } catch (final NoSuchAlgorithmException | InvalidKeyException ex) {
             return null;
         }
