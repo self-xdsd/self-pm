@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
  * @since 0.0.2
  */
 @Component
-public class ReviewAssignedTasks {
+public final class ReviewAssignedTasks {
 
     /**
      * The PMs will review the assigned tasks every 6 hours.
