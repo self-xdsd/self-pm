@@ -30,25 +30,25 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * Each PM will periodically review the unassigned tasks from the projects
+ * Each PM will periodically review the assigned tasks from the projects
  * they manage.
  * @author Mihai Andronache (amihaiemil@gmail.com)
  * @version $Id$
  * @since 0.0.2
  */
 @Component
-public final class ReviewUnassignedTasks {
+public class ReviewAssignedTasks {
 
     /**
-     * The PMs will review the unassigned tasks every 10 minutes.
+     * The PMs will review the assigned tasks every 6 hours.
      */
-    private static final int EVERY_10_MINUTES = 600000;
+    private static final int EVERY_6_HOURS = 21600000;
 
     /**
      * Logger.
      */
     private static final Logger LOG = LoggerFactory.getLogger(
-        ReviewUnassignedTasks.class
+        ReviewAssignedTasks.class
     );
 
     /**
@@ -61,24 +61,24 @@ public final class ReviewUnassignedTasks {
      * @param selfCode Self Core, injected by Spring automatically.
      */
     @Autowired
-    public ReviewUnassignedTasks(final Self selfCode) {
+    public ReviewAssignedTasks(final Self selfCode) {
         this.selfCore = selfCode;
     }
 
     /**
-     * Every 10 minutes the PMs should verify their unassigned tasks.
+     * Every 6 hours the PMs should verify their assigned tasks.
      */
-    @Scheduled(fixedRate = EVERY_10_MINUTES)
-    public void reviewUnassignedTasks() {
-        LOG.debug("PMs reviewing their unassigned tasks...");
+    @Scheduled(fixedRate = EVERY_6_HOURS)
+    public void reviewAssignedTasks() {
+        LOG.debug("PMs reviewing their assigned tasks...");
         for(final ProjectManager manager : this.selfCore.projectManagers()) {
             LOG.debug(
                 "PM @" + manager.username()
-                + " reviewing their unassinged tasks..."
+                + " reviewing their aassinged tasks..."
             );
             for(final Project project : manager.projects()) {
                 LOG.debug(
-                    "Reviewing unassigned tasks from project "
+                    "Reviewing assigned tasks from project "
                     + project.repoFullName() + " at " + project.provider()
                     + "... "
                 );
@@ -86,13 +86,13 @@ public final class ReviewUnassignedTasks {
                     new Event() {
                         @Override
                         public String type() {
-                            return Type.UNASSIGNED_TASKS;
+                            return Type.ASSIGNED_TASKS;
                         }
 
                         @Override
                         public Issue issue() {
                             throw new UnsupportedOperationException(
-                                "No Issue in the " + Type.UNASSIGNED_TASKS
+                                "No Issue in the " + Type.ASSIGNED_TASKS
                                 + " event."
                             );
                         }
@@ -100,7 +100,7 @@ public final class ReviewUnassignedTasks {
                         @Override
                         public Comment comment() {
                             throw new UnsupportedOperationException(
-                                "No Comment in the " + Type.UNASSIGNED_TASKS
+                                "No Comment in the " + Type.ASSIGNED_TASKS
                                 + " event."
                             );
                         }
@@ -113,7 +113,6 @@ public final class ReviewUnassignedTasks {
                 );
             }
         }
-        LOG.debug("All PMs finished reviewing their unassigned tasks.");
+        LOG.debug("All PMs finished reviewing their assigned tasks.");
     }
-
 }
