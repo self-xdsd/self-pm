@@ -33,7 +33,7 @@ echo $NEXT_VERSION
 
 mvn versions:set -DnewVersion=${tag}
 mvn clean deploy -PgenDocs,signArtifactsGpg,deployToGithubPackages --settings /home/r/settings.xml
-sed -i "s/module, version \`.*\`/module, version \`${tag}\`/" README.md
+sed -i "s/Manager, version \`.*\`/Manager, version \`${tag}\`/" README.md
 
 mvn versions:set -DnewVersion=${NEXT_VERSION}
 
