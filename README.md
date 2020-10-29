@@ -8,7 +8,7 @@
 [![DevOps By Rultor.com](http://www.rultor.com/b/self-xdsd/self-pm)](http://www.rultor.com/p/self-xdsd/self-pm)
 [![We recommend IntelliJ IDEA](http://amihaiemil.github.io/images/intellij-idea-recommend.svg)](https://www.jetbrains.com/idea/)
 
-Self Project Manager, version `0.0.2`
+Self Project Manager, version `0.0.3`
 
 ## Contributing 
 

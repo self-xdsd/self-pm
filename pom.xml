@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.selfxdsd</groupId>
 	<artifactId>self-pm</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.0.4-SNAPSHOT</version>
 	<name>self-pm</name>
 	<description>Project Manager in Self</description>
 
