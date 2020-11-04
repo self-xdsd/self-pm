@@ -135,11 +135,15 @@ public final class Webhooks {
 
                         @Override
                         public Issue issue() {
+                            final JsonObject jsn;
+                            if("pull_request".equalsIgnoreCase(type)) {
+                                jsn = this.event.getJsonObject("pull_request");
+                            } else {
+                                jsn = this.event.getJsonObject("issue");
+                            }
                             return project.projectManager().provider().repo(
                                 owner, name
-                            ).issues().received(
-                                this.event.getJsonObject("issue")
-                            );
+                            ).issues().received(jsn);
                         }
 
                         @Override
