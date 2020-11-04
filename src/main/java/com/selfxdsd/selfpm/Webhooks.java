@@ -148,6 +148,11 @@ public final class Webhooks {
                         }
 
                         @Override
+                        public Commit commit() {
+                            return null;
+                        }
+
+                        @Override
                         public Project project() {
                             return project;
                         }

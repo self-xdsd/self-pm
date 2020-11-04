@@ -106,6 +106,14 @@ public final class ReviewAssignedTasks {
                         }
 
                         @Override
+                        public Commit commit() {
+                            throw new UnsupportedOperationException(
+                                "No Commit in the " + Type.ASSIGNED_TASKS
+                                + " event."
+                            );
+                        }
+
+                        @Override
                         public Project project() {
                             return project;
                         }
