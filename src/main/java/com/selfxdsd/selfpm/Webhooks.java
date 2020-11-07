@@ -33,9 +33,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.json.Json;
-import javax.json.JsonObject;
-import java.io.StringReader;
 import java.net.URI;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -118,63 +115,7 @@ public final class Webhooks {
                     this.selfTodos.post(project, payload);
                 } else {
                     project.resolve(
-                        new Event() {
-                            /**
-                             * Event payload.
-                             */
-                            private final JsonObject event = Json.createReader(
-                                new StringReader(payload)
-                            ).readObject();
-
-                            @Override
-                            public String type() {
-                                final String resolved;
-                                if ("issues".equalsIgnoreCase(type)
-                                    || "pull_request".equalsIgnoreCase(type)) {
-                                    final String act = event.getString("action");
-                                    if ("opened".equalsIgnoreCase(act)) {
-                                        resolved = Type.NEW_ISSUE;
-                                    } else if ("reopened".equalsIgnoreCase(act)) {
-                                        resolved = Type.REOPENED_ISSUE;
-                                    } else {
-                                        resolved = type;
-                                    }
-                                } else {
-                                    resolved = type;
-                                }
-                                return resolved;
-                            }
-
-                            @Override
-                            public Issue issue() {
-                                final JsonObject jsn;
-                                if ("pull_request".equalsIgnoreCase(type)) {
-                                    jsn = this.event.getJsonObject("pull_request");
-                                } else {
-                                    jsn = this.event.getJsonObject("issue");
-                                }
-                                return project.projectManager().provider().repo(
-                                    owner, name
-                                ).issues().received(jsn);
-                            }
-
-                            @Override
-                            public Comment comment() {
-                                return this.issue().comments().received(
-                                    this.event.getJsonObject("comment")
-                                );
-                            }
-
-                            @Override
-                            public Commit commit() {
-                                return null;
-                            }
-
-                            @Override
-                            public Project project() {
-                                return project;
-                            }
-                        }
+                        new GithubWebhookEvent(project, type, payload)
                     );
                 }
             } else {
