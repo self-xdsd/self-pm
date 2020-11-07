@@ -99,17 +99,19 @@ public final class Webhooks {
         final @RequestHeader("X-Hub-Signature") String signature,
         final @RequestBody String payload
     ) {
+        LOG.debug(
+            "Received Github Webhook [" + type + "] from Repo "
+            + owner + "/" + name
+        );
         final Project project = this.selfCore.projects().getProjectById(
             owner + "/" + name,
             Provider.Names.GITHUB
         );
         if (project != null) {
-            LOG.debug("RECEIVED SIGNATURE: " + signature);
             final String calculated = this.hmacHexDigest(
                 project.webHookToken(),
                 payload
             );
-            LOG.debug("CALCULATED SIGNATURE: " + calculated);
             if(calculated != null && calculated.equals(signature)) {
                 if("push".equalsIgnoreCase(type)) {
                     this.selfTodos.post(project, payload);
