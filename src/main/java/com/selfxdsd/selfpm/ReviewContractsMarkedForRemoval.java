@@ -109,7 +109,7 @@ public final class ReviewContractsMarkedForRemoval {
      */
     @Scheduled(fixedRate = EVERY_24_HOURS, initialDelay = DELAY_15_MINUTES)
     public void reviewContractsMarkedForRemoval() {
-        LOG.debug("PMs reviewing their unassigned tasks...");
+        LOG.debug("PMs reviewing project contracts marked for removal...");
         for(final ProjectManager manager : this.selfCore.projectManagers()) {
             LOG.debug(
                 "PM @" + manager.username()
