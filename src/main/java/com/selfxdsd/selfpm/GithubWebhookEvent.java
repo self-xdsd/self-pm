@@ -33,9 +33,6 @@ import java.io.StringReader;
  * @author Mihai Andronache (amihaiemil@gmail.com)
  * @version $Id$
  * @since 0.0.4
- * @todo #340:40min This is a malformed todo
- * because the lines 2..n do not
- * start with a space.
  */
 public final class GithubWebhookEvent implements Event {
 
