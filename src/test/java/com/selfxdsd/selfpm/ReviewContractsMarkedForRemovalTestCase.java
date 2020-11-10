@@ -35,7 +35,7 @@ import java.util.function.Consumer;
  * Unit tests for {@link ReviewContractsMarkedForRemoval}.
  * @author criske
  * @version $Id$
- * @since 0.0.2
+ * @since 0.0.4
  */
 public final class ReviewContractsMarkedForRemovalTestCase {
 
