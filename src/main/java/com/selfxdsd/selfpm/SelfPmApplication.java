@@ -31,11 +31,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @author Mihai Andronache (amihaiemil@gmail.com)
  * @version $Id$
  * @since 0.0.1
- * @todo #55:60min Write a scheduled method which will make each PM
- *  review and completely remove any Contract which has been marked
- *  for removal more than 30 days ago (if markedForRemoval > 30 days).
- *  This method should run once per day and start with a delay of
- *  15 minutes, so it will not overlap with other scheduled jobs.
  * @checkstyle HideUtilityClassConstructor (100 lines)
  */
 @SpringBootApplication

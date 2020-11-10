@@ -41,7 +41,7 @@ import java.util.function.Supplier;
  * they manage.
  * @author criske
  * @version $Id$
- * @since 0.0.2
+ * @since 0.0.4
  * @todo #63:15min When Contract/Contracts API has a `remove` method, remove
  *  `removeContractApi` placeholder and use the real API.
  */
