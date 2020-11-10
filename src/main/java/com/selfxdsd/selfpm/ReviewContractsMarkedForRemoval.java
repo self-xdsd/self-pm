@@ -33,6 +33,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -41,10 +42,8 @@ import java.util.function.Supplier;
  * @author criske
  * @version $Id$
  * @since 0.0.2
- * @todo #63:15min When Contract/Contracts API has a `remove` method, replace
- *  `project.resolve(this.contractRemovalEvent(contract));` at line 131
- *  with the appropriate contract removal API call.
- *  Also remove the temporary helper `contractRemovalEvent()`.
+ * @todo #63:15min When Contract/Contracts API has a `remove` method, remove
+ *  `removeContractApi` placeholder and use the real API.
  */
 @Component
 public final class ReviewContractsMarkedForRemoval {
@@ -79,23 +78,38 @@ public final class ReviewContractsMarkedForRemoval {
     private final Supplier<LocalDateTime> nowSupplier;
 
     /**
+     * Temporary placeholder until Contract/Contracts API has way to
+     * remove a Contract marked for removal.
+     */
+    private final Consumer<Contract> removeContractApi;
+
+    /**
      * Ctor.
      * @param selfCore Self Core, injected by Spring automatically.
      */
     @Autowired
     public ReviewContractsMarkedForRemoval(final Self selfCore) {
-        this(selfCore, LocalDateTime::now);
+        this(selfCore, LocalDateTime::now, (contract) ->{
+            LOG.warn(
+                "Contract " + contract.contractId() + " can't be removed."
+                    +" The removal API method doesn't exist yet."
+            );
+        });
     }
 
     /**
      * Ctor used in tests.
      * @param selfCore Self Core.
      * @param nowSupplier Time "now" supplier.
+     * @param removeContractApi Temporary placeholder until Contract/Contracts
+     *  API has way to remove a Contract marked for removal.
      */
     ReviewContractsMarkedForRemoval(final Self selfCore,
-                                    final Supplier<LocalDateTime> nowSupplier) {
+                                    final Supplier<LocalDateTime> nowSupplier,
+                                    final Consumer<Contract> removeContractApi){
         this.selfCore = selfCore;
         this.nowSupplier = nowSupplier;
+        this.removeContractApi = removeContractApi;
     }
 
     /**
@@ -128,7 +142,7 @@ public final class ReviewContractsMarkedForRemoval {
                         + " contracts that will be removed..."
                 );
                 for(final Contract contract: toRemove){
-                    project.resolve(this.contractRemovalEvent(contract));
+                    this.removeContractApi.accept(contract);
                     LOG.debug(
                         "For project " + project.repoFullName() + " at "
                             + project.provider() + " contract "
@@ -161,44 +175,4 @@ public final class ReviewContractsMarkedForRemoval {
         }
         return toBeRemoved;
     }
-
-
-    /**
-     * Note: This method will be removed in the future.
-     * <br/>
-     * Event API used as a hack to test ReviewContractsMarkedForRemoval
-     * by piggy-backing on `project.resolve(...)` until a proper API for
-     * removing a contract exist.
-     * @param contract Contract.
-     * @return Fake Event.
-     */
-    private Event contractRemovalEvent(final Contract contract){
-        return new Event() {
-            @Override
-            public String type() {
-                return "REMOVE_CONTRACT: " + contract.contractId();
-            }
-
-            @Override
-            public Issue issue() {
-                return null;
-            }
-
-            @Override
-            public Comment comment() {
-                return null;
-            }
-
-            @Override
-            public Commit commit() {
-                return null;
-            }
-
-            @Override
-            public Project project() {
-                return null;
-            }
-        };
-    }
-
 }
