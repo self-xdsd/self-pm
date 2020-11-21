@@ -33,7 +33,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -42,8 +41,6 @@ import java.util.function.Supplier;
  * @author criske
  * @version $Id$
  * @since 0.0.4
- * @todo #63:15min When Contract/Contracts API has a `remove` method, remove
- *  `removeContractApi` placeholder and use the real API.
  */
 @Component
 public final class ReviewContractsMarkedForRemoval {
@@ -78,38 +75,23 @@ public final class ReviewContractsMarkedForRemoval {
     private final Supplier<LocalDateTime> nowSupplier;
 
     /**
-     * Temporary placeholder until Contract/Contracts API has way to
-     * remove a Contract marked for removal.
-     */
-    private final Consumer<Contract> removeContractApi;
-
-    /**
      * Ctor.
      * @param selfCore Self Core, injected by Spring automatically.
      */
     @Autowired
     public ReviewContractsMarkedForRemoval(final Self selfCore) {
-        this(selfCore, LocalDateTime::now, (contract) ->{
-            LOG.warn(
-                "Contract " + contract.contractId() + " can't be removed."
-                    +" The removal API method doesn't exist yet."
-            );
-        });
+        this(selfCore, LocalDateTime::now);
     }
 
     /**
      * Ctor used in tests.
      * @param selfCore Self Core.
      * @param nowSupplier Time "now" supplier.
-     * @param removeContractApi Temporary placeholder until Contract/Contracts
-     *  API has way to remove a Contract marked for removal.
      */
     ReviewContractsMarkedForRemoval(final Self selfCore,
-                                    final Supplier<LocalDateTime> nowSupplier,
-                                    final Consumer<Contract> removeContractApi){
+                                    final Supplier<LocalDateTime> nowSupplier){
         this.selfCore = selfCore;
         this.nowSupplier = nowSupplier;
-        this.removeContractApi = removeContractApi;
     }
 
     /**
@@ -142,7 +124,7 @@ public final class ReviewContractsMarkedForRemoval {
                         + " contracts that will be removed..."
                 );
                 for(final Contract contract: toRemove){
-                    this.removeContractApi.accept(contract);
+                    contract.remove();
                     LOG.debug(
                         "For project " + project.repoFullName() + " at "
                             + project.provider() + " contract "

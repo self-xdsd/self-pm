@@ -29,7 +29,6 @@ import org.mockito.Mockito;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Unit tests for {@link ReviewContractsMarkedForRemoval}.
@@ -94,13 +93,12 @@ public final class ReviewContractsMarkedForRemovalTestCase {
         Mockito.when(contracts.iterator())
             .thenReturn(contractsSrc.iterator());
 
-        final Consumer<Contract> removeContractApi = Mockito
-            .mock(Consumer.class);
-        new ReviewContractsMarkedForRemoval(self, () -> now, removeContractApi)
+        new ReviewContractsMarkedForRemoval(self, () -> now)
             .reviewContractsMarkedForRemoval();
 
-        Mockito.verify(removeContractApi, Mockito.times(1))
-            .accept(ctB);
+        Mockito.verify(ctA, Mockito.never()).remove();
+        Mockito.verify(ctB, Mockito.times(1)).remove();
+        Mockito.verify(ctC, Mockito.never()).remove();
     }
 
     /**
