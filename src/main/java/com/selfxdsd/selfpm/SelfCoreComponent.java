@@ -23,6 +23,7 @@
 package com.selfxdsd.selfpm;
 
 import com.selfxdsd.api.*;
+import com.selfxdsd.core.Env;
 import com.selfxdsd.core.SelfCore;
 import com.selfxdsd.storage.MySql;
 import com.selfxdsd.storage.SelfJooq;
@@ -43,9 +44,9 @@ public final class SelfCoreComponent implements Self {
     private final Self core = new SelfCore(
         new SelfJooq(
             new MySql(
-                System.getenv("self_db_url"),
-                System.getenv("self_db_user"),
-                System.getenv("self_db_password")
+                System.getenv(Env.DB_URL),
+                System.getenv(Env.DB_USER),
+                System.getenv(Env.DB_PASSWORD)
             )
         )
     );

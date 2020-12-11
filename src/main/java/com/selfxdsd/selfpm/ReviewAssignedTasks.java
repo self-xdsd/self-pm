@@ -40,9 +40,9 @@ import org.springframework.stereotype.Component;
 public final class ReviewAssignedTasks {
 
     /**
-     * The PMs will review the assigned tasks every 6 hours.
+     * The PMs will review the assigned tasks every 4 hours.
      */
-    private static final int EVERY_6_HOURS = 21600000;
+    private static final int EVERY_4_MINUTES = 240000;
 
     /**
      * Logger.
@@ -68,7 +68,7 @@ public final class ReviewAssignedTasks {
     /**
      * Every 6 hours the PMs should verify their assigned tasks.
      */
-    @Scheduled(fixedRate = EVERY_6_HOURS)
+    @Scheduled(fixedRate = EVERY_4_MINUTES)
     public void reviewAssignedTasks() {
         LOG.debug("PMs reviewing their assigned tasks...");
         for(final ProjectManager manager : this.selfCore.projectManagers()) {
