@@ -31,13 +31,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Unit tests for {@link ReviewUnassignedTasks}.
+ * Unit tests for {@link ReviewAssignedTasks}.
  * @author Mihai Andronache (amihaiemil@gmail.com)
  * @version $Id$
- * @since 0.0.2
+ * @since 0.0.1
  * @checkstyle ExecutableStatementCount (500 lines)
  */
-public final class ReviewUnassignedTasksTestCase {
+public final class ReviewAssignedTasksTestCase {
 
     /**
      * It should work fine if the PM has no assigned Projects.
@@ -57,8 +57,8 @@ public final class ReviewUnassignedTasksTestCase {
         );
         final Self core = Mockito.mock(Self.class);
         Mockito.when(core.projectManagers()).thenReturn(all);
-        final ReviewUnassignedTasks review = new ReviewUnassignedTasks(core);
-        review.reviewUnassignedTasks();
+        final ReviewAssignedTasks review = new ReviewAssignedTasks(core);
+        review.reviewAssignedTasks();
         Mockito.verify(core, Mockito.times(1)).projectManagers();
         Mockito.verify(manager, Mockito.times(1)).projects();
     }
@@ -88,8 +88,8 @@ public final class ReviewUnassignedTasksTestCase {
         );
         final Self core = Mockito.mock(Self.class);
         Mockito.when(core.projectManagers()).thenReturn(all);
-        final ReviewUnassignedTasks review = new ReviewUnassignedTasks(core);
-        review.reviewUnassignedTasks();
+        final ReviewAssignedTasks review = new ReviewAssignedTasks(core);
+        review.reviewAssignedTasks();
         Mockito.verify(core, Mockito.times(1)).projectManagers();
         Mockito.verify(manager, Mockito.times(1)).projects();
         for(int idx = 0; idx <3; idx++){
@@ -129,8 +129,8 @@ public final class ReviewUnassignedTasksTestCase {
         );
         final Self core = Mockito.mock(Self.class);
         Mockito.when(core.projectManagers()).thenReturn(all);
-        final ReviewUnassignedTasks review = new ReviewUnassignedTasks(core);
-        review.reviewUnassignedTasks();
+        final ReviewAssignedTasks review = new ReviewAssignedTasks(core);
+        review.reviewAssignedTasks();
         Mockito.verify(core, Mockito.times(1)).projectManagers();
         Mockito.verify(manager, Mockito.times(1)).projects();
         for(int idx = 0; idx <3; idx++){
@@ -138,4 +138,5 @@ public final class ReviewUnassignedTasksTestCase {
             Mockito.verify(project, Mockito.times(1)).resolve(Mockito.any());
         }
     }
+
 }

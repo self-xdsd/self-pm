@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
  * @author Mihai Andronache (amihaiemil@gmail.com)
  * @version $Id$
  * @since 0.0.2
+ * @checkstyle IllegalCatch (500 lines)
  */
 @Component
 public final class ReviewUnassignedTasks {
@@ -82,43 +83,51 @@ public final class ReviewUnassignedTasks {
                     + project.repoFullName() + " at " + project.provider()
                     + "... "
                 );
-                project.resolve(
-                    new Event() {
-                        @Override
-                        public String type() {
-                            return Type.UNASSIGNED_TASKS;
-                        }
+                try {
+                    project.resolve(
+                        new Event() {
+                            @Override
+                            public String type() {
+                                return Type.UNASSIGNED_TASKS;
+                            }
 
-                        @Override
-                        public Issue issue() {
-                            throw new UnsupportedOperationException(
-                                "No Issue in the " + Type.UNASSIGNED_TASKS
-                                + " event."
-                            );
-                        }
+                            @Override
+                            public Issue issue() {
+                                throw new UnsupportedOperationException(
+                                    "No Issue in the " + Type.UNASSIGNED_TASKS
+                                    + " event."
+                                );
+                            }
 
-                        @Override
-                        public Comment comment() {
-                            throw new UnsupportedOperationException(
-                                "No Comment in the " + Type.UNASSIGNED_TASKS
-                                + " event."
-                            );
-                        }
+                            @Override
+                            public Comment comment() {
+                                throw new UnsupportedOperationException(
+                                    "No Comment in the " + Type.UNASSIGNED_TASKS
+                                    + " event."
+                                );
+                            }
 
-                        @Override
-                        public Commit commit() {
-                            throw new UnsupportedOperationException(
-                                "No Commit in the " + Type.UNASSIGNED_TASKS
-                                + " event."
-                            );
-                        }
+                            @Override
+                            public Commit commit() {
+                                throw new UnsupportedOperationException(
+                                    "No Commit in the " + Type.UNASSIGNED_TASKS
+                                    + " event."
+                                );
+                            }
 
-                        @Override
-                        public Project project() {
-                            return project;
+                            @Override
+                            public Project project() {
+                                return project;
+                            }
                         }
-                    }
-                );
+                    );
+                } catch (final RuntimeException ex) {
+                    LOG.error(
+                        "Problem while reviewing unassigned tasks of Project "
+                        + project.repoFullName() + " at " + project.provider(),
+                        ex
+                    );
+                }
             }
         }
         LOG.debug("All PMs finished reviewing their unassigned tasks.");
