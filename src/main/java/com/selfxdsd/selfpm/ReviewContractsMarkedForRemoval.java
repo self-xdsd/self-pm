@@ -41,6 +41,7 @@ import java.util.function.Supplier;
  * @author criske
  * @version $Id$
  * @since 0.0.4
+ * @checkstyle IllegalCatch (1000 lines)
  */
 @Component
 public final class ReviewContractsMarkedForRemoval {
@@ -117,19 +118,37 @@ public final class ReviewContractsMarkedForRemoval {
                     + project.repoFullName() + " at " + project.provider()
                     + "... "
                 );
-                final List<Contract> toRemove = this.contractsToRemove(project);
-                LOG.debug(
-                    "For project " + project.repoFullName() + " at "
-                        + project.provider() + " there are " + toRemove.size()
-                        + " contracts that will be removed..."
-                );
-                for(final Contract contract: toRemove){
-                    contract.remove();
+                try {
+                    final List<Contract> toRemove = this.contractsToRemove(
+                        project
+                    );
                     LOG.debug(
                         "For project " + project.repoFullName() + " at "
-                            + project.provider() + " contract "
-                            + contract.contractId()
-                            + " was removed..."
+                        + project.provider() + " there are " + toRemove.size()
+                        + " contracts that will be removed..."
+                    );
+                    for(final Contract contract: toRemove){
+                        LOG.debug(
+                            "Removing contract ["
+                            + contract.contractId() + "]..."
+                        );
+                        try {
+                            contract.remove();
+                            LOG.debug("Contract successfully removed!");
+                        } catch (final RuntimeException ex) {
+                            LOG.error(
+                                "Problem while removing contract ["
+                                + contract.contractId() + "].",
+                                ex
+                            );
+                        }
+                    }
+                } catch (final RuntimeException ex) {
+                    LOG.error(
+                        "Problem when fetching Contracts to be removed "
+                        + "for Project " + project.repoFullName()
+                        + " at " + project.provider() + ". ",
+                        ex
                     );
                 }
             }
