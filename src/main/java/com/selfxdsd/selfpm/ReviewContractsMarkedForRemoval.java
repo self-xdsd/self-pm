@@ -118,38 +118,29 @@ public final class ReviewContractsMarkedForRemoval {
                     + project.repoFullName() + " at " + project.provider()
                     + "... "
                 );
-                try {
-                    final List<Contract> toRemove = this.contractsToRemove(
-                        project
-                    );
+                final List<Contract> toRemove = this.contractsToRemove(
+                    project
+                );
+                LOG.debug(
+                    "For project " + project.repoFullName() + " at "
+                    + project.provider() + " there are " + toRemove.size()
+                    + " contracts that will be removed..."
+                );
+                for(final Contract contract: toRemove){
                     LOG.debug(
-                        "For project " + project.repoFullName() + " at "
-                        + project.provider() + " there are " + toRemove.size()
-                        + " contracts that will be removed..."
+                        "Removing contract ["
+                        + contract.contractId() + "]..."
                     );
-                    for(final Contract contract: toRemove){
-                        LOG.debug(
-                            "Removing contract ["
-                            + contract.contractId() + "]..."
+                    try {
+                        contract.remove();
+                        LOG.debug("Contract successfully removed!");
+                    } catch (final RuntimeException ex) {
+                        LOG.error(
+                            "Problem while removing contract ["
+                            + contract.contractId() + "].",
+                            ex
                         );
-                        try {
-                            contract.remove();
-                            LOG.debug("Contract successfully removed!");
-                        } catch (final RuntimeException ex) {
-                            LOG.error(
-                                "Problem while removing contract ["
-                                + contract.contractId() + "].",
-                                ex
-                            );
-                        }
                     }
-                } catch (final RuntimeException ex) {
-                    LOG.error(
-                        "Problem when fetching Contracts to be removed "
-                        + "for Project " + project.repoFullName()
-                        + " at " + project.provider() + ". ",
-                        ex
-                    );
                 }
             }
         }
