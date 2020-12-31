@@ -41,9 +41,9 @@ import org.springframework.stereotype.Component;
 public final class ReviewUnassignedTasks {
 
     /**
-     * The PMs will review the unassigned tasks every 3 minutes.
+     * The PMs will review the unassigned tasks every 10 minutes.
      */
-    private static final int EVERY_3_MINUTES = 180000;
+    private static final int EVERY_10_MINUTES = 600000;
 
     /**
      * Logger.
@@ -69,7 +69,7 @@ public final class ReviewUnassignedTasks {
     /**
      * Every 10 minutes the PMs should verify their unassigned tasks.
      */
-    @Scheduled(fixedRate = EVERY_3_MINUTES)
+    @Scheduled(fixedRate = EVERY_10_MINUTES)
     public void reviewUnassignedTasks() {
         LOG.debug("PMs reviewing their unassigned tasks...");
         for(final ProjectManager manager : this.selfCore.projectManagers()) {
