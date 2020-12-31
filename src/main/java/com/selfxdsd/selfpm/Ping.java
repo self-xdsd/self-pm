@@ -22,6 +22,7 @@
  */
 package com.selfxdsd.selfpm;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,12 +36,20 @@ import org.springframework.web.bind.annotation.*;
 public final class Ping {
 
     /**
+     * Build version.
+     */
+    @Value("${build.version}")
+    private String buildVersion;
+
+    /**
      * Ping the service to see if it's online.
      * @return ResponseEntity.
      */
     @GetMapping("/ping")
     public ResponseEntity<String> ping() {
-        return ResponseEntity.ok("Self PM is up and running!");
+        return ResponseEntity.ok(
+            "Self PM " + this.buildVersion + " is up and running!"
+        );
     }
 
 }
