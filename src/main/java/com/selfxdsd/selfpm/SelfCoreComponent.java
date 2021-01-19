@@ -41,15 +41,32 @@ public final class SelfCoreComponent implements Self {
     /**
      * Self's core.
      */
-    private final Self core = new SelfCore(
-        new SelfJooq(
-            new MySql(
-                System.getenv(Env.DB_URL),
-                System.getenv(Env.DB_USER),
-                System.getenv(Env.DB_PASSWORD)
+    private final Self core;
+
+    /**
+     * Default constructor for Spring.
+     */
+    public SelfCoreComponent() {
+        this(
+            new SelfCore(
+                new SelfJooq(
+                    new MySql(
+                        System.getenv(Env.DB_URL),
+                        System.getenv(Env.DB_USER),
+                        System.getenv(Env.DB_PASSWORD)
+                    )
+                )
             )
-        )
-    );
+        );
+    }
+
+    /**
+     * Constructor.
+     * @param core Encapsulated core.
+     */
+    public SelfCoreComponent(final Self core) {
+        this.core = core;
+    }
 
     @Override
     public User login(final Login login) {
