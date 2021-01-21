@@ -150,7 +150,7 @@ public final class Webhooks {
      * @return ResponseEntity.
      */
     @PostMapping(
-        value = "/github/{owner}/{name}",
+        value = "/gitlab/{owner}/{name}",
         consumes = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Void> gitlab(
