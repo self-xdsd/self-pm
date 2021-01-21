@@ -33,8 +33,7 @@ import java.io.StringReader;
  * @author Mihai Andronache (amihaiemil@gmail.com)
  * @version $Id$
  * @since 0.0.5
- * @todo #86:60min Implement and test this class according to the GitLab
- *  Webhook documentation and having GithubWebhookEvent as example.
+ * @see <a href="https://docs.gitlab.com/ee/user/project/integrations/webhooks.html">Documentation.</a>
  */
 public final class GitlabWebhookEvent implements Event {
 
@@ -73,7 +72,33 @@ public final class GitlabWebhookEvent implements Event {
 
     @Override
     public String type() {
-        return null;
+        final String resolved;
+        if("Issue Hook".equalsIgnoreCase(this.type)
+            || "Merge Request Hook".equalsIgnoreCase(this.type)) {
+            final String state = this.event.getJsonObject(
+                "object_attributes"
+            ).getString("state", "");
+            if(state.startsWith("open")) {
+                resolved = Type.NEW_ISSUE;
+            } else if (state.startsWith("reopen")) {
+                resolved = Type.REOPENED_ISSUE;
+            } else {
+                resolved = type;
+            }
+        } else if("Note Hook".equalsIgnoreCase(this.type)) {
+            final String noteableType = this.event.getJsonObject(
+                "object_attributes"
+            ).getString("noteable_type", "");
+            if("Issue".equalsIgnoreCase(noteableType)
+                || "MergeRequest".equalsIgnoreCase(noteableType)) {
+                resolved = Type.ISSUE_COMMENT;
+            } else {
+                resolved = type;
+            }
+        } else {
+            resolved = type;
+        }
+        return resolved;
     }
 
     @Override
@@ -93,6 +118,6 @@ public final class GitlabWebhookEvent implements Event {
 
     @Override
     public Project project() {
-        return null;
+        return this.project;
     }
 }
