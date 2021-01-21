@@ -63,9 +63,7 @@ public final class Webhooks {
     /**
      * Self-Todos microservice.
      */
-    private final SelfTodos selfTodos = new RestfulSelfTodos(
-        URI.create("http://localhost:8282")
-    );
+    private final SelfTodos selfTodos;
 
     /**
      * Ctor.
@@ -73,7 +71,22 @@ public final class Webhooks {
      */
     @Autowired
     public Webhooks(final Self selfCore) {
+        this(
+            selfCore,
+            new RestfulSelfTodos(
+                URI.create("http://localhost:8282")
+            )
+        );
+    }
+
+    /**
+     * Ctor.
+     * @param selfCore Self's core.
+     * @param selfTodos Self TODOs Microservice.
+     */
+    public Webhooks(final Self selfCore, final SelfTodos selfTodos) {
         this.selfCore = selfCore;
+        this.selfTodos = selfTodos;
     }
 
     /**
@@ -99,7 +112,7 @@ public final class Webhooks {
     ) {
         LOG.debug(
             "Received Github Webhook [" + type + "] from Repo "
-            + owner + "/" + name
+            + owner + "/" + name + ". "
         );
         final Project project = this.selfCore.projects().getProjectById(
             owner + "/" + name,
@@ -116,6 +129,52 @@ public final class Webhooks {
                 } else {
                     project.resolve(
                         new GithubWebhookEvent(project, type, payload)
+                    );
+                }
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
+        } else {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Webhook for GitLab projects.
+     * @param owner Owner's username (can be a user or organization name).
+     * @param name Repo's name.
+     * @param type Event type.
+     * @param token Secret project token.
+     * @param payload Request body in JSON.
+     * @return ResponseEntity.
+     */
+    @PostMapping(
+        value = "/github/{owner}/{name}",
+        consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Void> gitlab(
+        final @PathVariable String owner,
+        final @PathVariable String name,
+        final @RequestHeader("X-Gitlab-Event") String type,
+        final @RequestHeader("X-Gitlab-Token") String token,
+        final @RequestBody String payload
+    ) {
+        LOG.debug(
+            "Received GitLab Webhook [" + type + "] from Repo "
+            + owner + "/" + name + ". "
+        );
+        final Project project = this.selfCore.projects().getProjectById(
+            owner + "/" + name,
+            Provider.Names.GITLAB
+        );
+        if (project != null) {
+            if(token != null && token.equals(project.webHookToken())) {
+                if("Push Hook".equalsIgnoreCase(type)) {
+                    this.selfTodos.post(project, payload);
+                } else {
+                    project.resolve(
+                        new GitlabWebhookEvent(project, type, payload)
                     );
                 }
             } else {
