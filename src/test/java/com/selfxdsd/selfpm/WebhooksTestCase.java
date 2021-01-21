@@ -268,4 +268,133 @@ public final class WebhooksTestCase {
             Matchers.equalTo("issue_comment")
         );
     }
+
+    /**
+     * Webhooks.gitlab returns No Content if the project is
+     * not found.
+     */
+    @Test
+    public void gitlabProjectNotFound() {
+        final Projects all = Mockito.mock(Projects.class);
+        Mockito.when(
+            all.getProjectById("john/test", Provider.Names.GITLAB)
+        ).thenReturn(null);
+        final Self self = Mockito.mock(Self.class);
+        Mockito.when(self.projects()).thenReturn(all);
+        final Webhooks hook = new Webhooks(self);
+        MatcherAssert.assertThat(
+            hook.gitlab(
+                "john",
+                "test",
+                "Push Hook",
+                "90sdwdf8w9",
+                "payload"
+            ).getStatusCode(),
+            Matchers.equalTo(HttpStatus.NO_CONTENT)
+        );
+    }
+
+    /**
+     * If the project token does not match, so
+     * the GitLab hook should return 400 BAD REQUEST.
+     */
+    @Test
+    public void gitlabProjectBadToken() {
+        final Project project = Mockito.mock(Project.class);
+        Mockito.when(project.webHookToken()).thenReturn("token123");
+        Mockito.doThrow(IllegalStateException.class)
+            .when(project)
+            .resolve(Mockito.any(Event.class));
+        final Projects all = Mockito.mock(Projects.class);
+        Mockito.when(
+            all.getProjectById("john/test", Provider.Names.GITLAB)
+        ).thenReturn(project);
+        final Self self = Mockito.mock(Self.class);
+        Mockito.when(self.projects()).thenReturn(all);
+        final Webhooks hook = new Webhooks(self);
+        MatcherAssert.assertThat(
+            hook.gitlab(
+                "john",
+                "test",
+                "Push Hook",
+                "token123456789",
+                "{\"json\":\"payload\"}"
+            ).getStatusCode(),
+            Matchers.equalTo(HttpStatus.BAD_REQUEST)
+        );
+    }
+
+    /**
+     * If the event is "Push Hook", the payload should be forwarded to
+     * SelfTodos.
+     */
+    @Test
+    public void gitlabWebhookForwardsPushToSelfTodos() {
+        final Project project = Mockito.mock(Project.class);
+        Mockito.when(project.webHookToken()).thenReturn("token123");
+        Mockito.doThrow(IllegalStateException.class)
+            .when(project)
+            .resolve(Mockito.any(Event.class));
+        final Projects all = Mockito.mock(Projects.class);
+        Mockito.when(
+            all.getProjectById("john/test", Provider.Names.GITLAB)
+        ).thenReturn(project);
+        final Self self = Mockito.mock(Self.class);
+        Mockito.when(self.projects()).thenReturn(all);
+
+        final SelfTodos selfTodos = Mockito.mock(SelfTodos.class);
+
+        final Webhooks hook = new Webhooks(self, selfTodos);
+        MatcherAssert.assertThat(
+            hook.gitlab(
+                "john",
+                "test",
+                "Push Hook",
+                "token123",
+                "{\"json\":\"payload\"}"
+            ).getStatusCode(),
+            Matchers.equalTo(HttpStatus.OK)
+        );
+        Mockito.verify(
+            selfTodos,
+            Mockito.times(1)
+        ).post(project, "{\"json\":\"payload\"}");
+    }
+
+    /**
+     * If the event is other than "Push Hook", the Project should resolve
+     * the event.
+     */
+    @Test
+    public void gitlabWebhookResolvesEvent() {
+        final Project project = Mockito.mock(Project.class);
+        Mockito.when(project.webHookToken()).thenReturn("token123");
+        final Projects all = Mockito.mock(Projects.class);
+        Mockito.when(
+            all.getProjectById("john/test", Provider.Names.GITLAB)
+        ).thenReturn(project);
+        final Self self = Mockito.mock(Self.class);
+        Mockito.when(self.projects()).thenReturn(all);
+
+        final SelfTodos selfTodos = Mockito.mock(SelfTodos.class);
+        Mockito
+            .doThrow(new IllegalStateException("Should not be called"))
+            .when(selfTodos).post(project, "{\"json\":\"payload\"}");
+
+        final Webhooks hook = new Webhooks(self, selfTodos);
+        MatcherAssert.assertThat(
+            hook.gitlab(
+                "john",
+                "test",
+                "Issue Comment",
+                "token123",
+                "{\"json\":\"payload\"}"
+            ).getStatusCode(),
+            Matchers.equalTo(HttpStatus.OK)
+        );
+        Mockito.verify(
+            project,
+            Mockito.times(1)
+        ).resolve(Mockito.any(GitlabWebhookEvent.class));
+    }
 }
