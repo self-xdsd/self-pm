@@ -248,5 +248,38 @@ public final class GitlabWebhookEventTestCase {
         );
     }
 
+    /**
+     * It returns the Project.
+     */
+    @Test
+    public void returnsProject() {
+        final Project project = Mockito.mock(Project.class);
+        final Event gitlabEvent = new GitlabWebhookEvent(
+            project,
+            "Commit Hook",
+            "{}"
+        );
+        MatcherAssert.assertThat(
+            gitlabEvent.project(),
+            Matchers.is(project)
+        );
+    }
+
+    /**
+     * The PUSH events are handled sepparately, so the commit in
+     * GitlabWebhookEvent should be null.
+     */
+    @Test
+    public void commitIsAlwaysNull() {
+        final Event gitlabEvent = new GitlabWebhookEvent(
+            Mockito.mock(Project.class),
+            "Commit Hook",
+            "{}"
+        );
+        MatcherAssert.assertThat(
+            gitlabEvent.commit(),
+            Matchers.nullValue()
+        );
+    }
 
 }
