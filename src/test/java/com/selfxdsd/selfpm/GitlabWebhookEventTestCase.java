@@ -22,8 +22,7 @@
  */
 package com.selfxdsd.selfpm;
 
-import com.selfxdsd.api.Event;
-import com.selfxdsd.api.Project;
+import com.selfxdsd.api.*;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -280,6 +279,184 @@ public final class GitlabWebhookEventTestCase {
             gitlabEvent.commit(),
             Matchers.nullValue()
         );
+    }
+
+    /**
+     * We can retrieve the Issue from an Issue Hook event.
+     */
+    @Test
+    public void returnsIssueFromIssueEvent() {
+        final Project project = Mockito.mock(Project.class);
+        final Issue issue = this.mockIssue(project, "1");
+
+        final Event gitlabEvent = new GitlabWebhookEvent(
+            project,
+            "Issue Hook",
+            Json.createObjectBuilder()
+                .add(
+                    "object_attributes",
+                    Json.createObjectBuilder()
+                        .add("iid", "1")
+                        .add("state", "opened")
+                ).build().toString()
+        );
+        MatcherAssert.assertThat(
+            gitlabEvent.issue(),
+            Matchers.is(issue)
+        );
+    }
+
+    /**
+     * We can retrieve the Issue from an Merge Request Hook event.
+     */
+    @Test
+    public void returnsIssueFromMergeRequestEvent() {
+        final Project project = Mockito.mock(Project.class);
+        final Issue issue = this.mockIssue(project, "1");
+
+        final Event gitlabEvent = new GitlabWebhookEvent(
+            project,
+            "Merge Request Hook",
+            Json.createObjectBuilder()
+                .add(
+                    "object_attributes",
+                    Json.createObjectBuilder()
+                        .add("iid", "1")
+                        .add("state", "opened")
+                ).build().toString()
+        );
+        MatcherAssert.assertThat(
+            gitlabEvent.issue(),
+            Matchers.is(issue)
+        );
+    }
+
+    /**
+     * We can retrieve the Issue from an issue comment event.
+     */
+    @Test
+    public void returnsIssueFromIssueCommentEvent() {
+        final Project project = Mockito.mock(Project.class);
+        final Issue issue = this.mockIssue(project, "1");
+
+        final Event gitlabEvent = new GitlabWebhookEvent(
+            project,
+            "Note Hook",
+            Json.createObjectBuilder()
+                .add(
+                    "object_attributes",
+                    Json.createObjectBuilder()
+                        .add("noteable_type", "Issue")
+                )
+                .add(
+                    "issue",
+                    Json.createObjectBuilder()
+                        .add("iid", "1")
+                ).build().toString()
+        );
+        MatcherAssert.assertThat(
+            gitlabEvent.issue(),
+            Matchers.is(issue)
+        );
+    }
+
+    /**
+     * We can retrieve the Issue from an merge request comment event.
+     */
+    @Test
+    public void returnsIssueFromMergeRequestCommentEvent() {
+        final Project project = Mockito.mock(Project.class);
+        final Issue issue = this.mockIssue(project, "1");
+
+        final Event gitlabEvent = new GitlabWebhookEvent(
+            project,
+            "Note Hook",
+            Json.createObjectBuilder()
+                .add(
+                    "object_attributes",
+                    Json.createObjectBuilder()
+                        .add("noteable_type", "MergeRequest")
+                )
+                .add(
+                    "merge_request",
+                    Json.createObjectBuilder()
+                        .add("iid", "1")
+                ).build().toString()
+        );
+        MatcherAssert.assertThat(
+            gitlabEvent.issue(),
+            Matchers.is(issue)
+        );
+    }
+
+    /**
+     * Issue is null if the comment event is from something else
+     * other than Issue or MergeRequest (e.g. commit comment).
+     */
+    @Test
+    public void noIssueOnOtherCommentEvent() {
+        final Event gitlabEvent = new GitlabWebhookEvent(
+            Mockito.mock(Project.class),
+            "Note Hook",
+            Json.createObjectBuilder()
+                .add(
+                    "object_attributes",
+                    Json.createObjectBuilder()
+                        .add("noteable_type", "Commit")
+                )
+                .build().toString()
+        );
+        MatcherAssert.assertThat(
+            gitlabEvent.issue(),
+            Matchers.nullValue()
+        );
+    }
+
+    /**
+     * Issue is null if the event is other then Issue/MR Hook or Note Hook.
+     */
+    @Test
+    public void noIssueOnUnknownEvent() {
+        final Event gitlabEvent = new GitlabWebhookEvent(
+            Mockito.mock(Project.class),
+            "Other Hook",
+            Json.createObjectBuilder()
+                .build()
+                .toString()
+        );
+        MatcherAssert.assertThat(
+            gitlabEvent.issue(),
+            Matchers.nullValue()
+        );
+    }
+
+    /**
+     * Mock an Issue/Merge Request for Test.
+     * @param project Project where the Issue is coming from.
+     * @param iid Internal ID of the Issue/MR.
+     * @return Issue.
+     */
+    public Issue mockIssue(final Project project, final String iid) {
+        final Issue issue = Mockito.mock(Issue.class);
+
+        final Issues all = Mockito.mock(Issues.class);
+        Mockito.when(all.getById(iid)).thenReturn(issue);
+        final Repo repo = Mockito.mock(Repo.class);
+        Mockito.when(repo.issues()).thenReturn(all);
+
+        Mockito.when(project.repoFullName()).thenReturn("mihai/test");
+        final Provider gitlab = Mockito.mock(Provider.class);
+        Mockito.when(
+            gitlab.repo(
+                project.repoFullName().split("/")[0],
+                project.repoFullName().split("/")[1]
+            )
+        ).thenReturn(repo);
+        final ProjectManager manager = Mockito.mock(ProjectManager.class);
+        Mockito.when(manager.provider()).thenReturn(gitlab);
+        Mockito.when(project.projectManager()).thenReturn(manager);
+
+        return issue;
     }
 
 }

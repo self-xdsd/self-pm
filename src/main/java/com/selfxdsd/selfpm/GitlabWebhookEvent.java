@@ -83,7 +83,7 @@ public final class GitlabWebhookEvent implements Event {
             } else if (state.startsWith("reopen")) {
                 resolved = Type.REOPENED_ISSUE;
             } else {
-                resolved = type;
+                resolved = this.type;
             }
         } else if("Note Hook".equalsIgnoreCase(this.type)) {
             final String noteableType = this.event.getJsonObject(
@@ -93,17 +93,47 @@ public final class GitlabWebhookEvent implements Event {
                 || "MergeRequest".equalsIgnoreCase(noteableType)) {
                 resolved = Type.ISSUE_COMMENT;
             } else {
-                resolved = type;
+                resolved = this.type;
             }
         } else {
-            resolved = type;
+            resolved = this.type;
         }
         return resolved;
     }
 
     @Override
     public Issue issue() {
-        return null;
+        final String iid;
+        if("Issue Hook".equalsIgnoreCase(this.type)
+            || "Merge Request Hook".equalsIgnoreCase(this.type)) {
+            iid = this.event.getJsonObject("object_attributes")
+                .getString("iid");
+        } else if("Note Hook".equalsIgnoreCase(this.type)) {
+            final String noteableType = this.event.getJsonObject(
+                "object_attributes"
+            ).getString("noteable_type", "");
+            if("Issue".equalsIgnoreCase(noteableType)) {
+                iid = this.event.getJsonObject("issue").getString("iid");
+            } else if("MergeRequest".equalsIgnoreCase(noteableType)){
+                iid = this.event.getJsonObject("merge_request")
+                    .getString("iid");
+            } else {
+                iid = null;
+            }
+        } else {
+            iid = null;
+        }
+        final Issue issue;
+        if(iid != null) {
+            final String repoFullName = this.project.repoFullName();
+            issue = this.project.projectManager().provider().repo(
+                repoFullName.split("/")[0],
+                repoFullName.split("/")[1]
+            ).issues().getById(iid);
+        } else {
+            issue = null;
+        }
+        return issue;
     }
 
     @Override
