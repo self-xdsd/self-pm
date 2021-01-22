@@ -138,7 +138,41 @@ public final class GitlabWebhookEvent implements Event {
 
     @Override
     public Comment comment() {
-        return null;
+        final JsonObject jsonComment;
+        if("Note Hook".equalsIgnoreCase(this.type)) {
+            final JsonObject attributes = this.event.getJsonObject(
+                "object_attributes"
+            );
+            final String noteableType = attributes.getString(
+                "noteable_type", ""
+            );
+            if ("Issue".equalsIgnoreCase(noteableType)
+                || "MergeRequest".equalsIgnoreCase(noteableType)) {
+                jsonComment = Json.createObjectBuilder()
+                    .add("id", attributes.getString("id"))
+                    .add("body", attributes.getString("note"))
+                    .add(
+                        "author",
+                        Json.createObjectBuilder()
+                            .add(
+                                "username",
+                                this.event.getJsonObject("user")
+                                    .getString("username")
+                            )
+                    ).build();
+            } else {
+                jsonComment = null;
+            }
+        } else {
+            jsonComment = null;
+        }
+        final Comment comment;
+        if(jsonComment != null) {
+            comment = this.issue().comments().received(jsonComment);
+        } else {
+            comment = null;
+        }
+        return comment;
     }
 
     @Override
