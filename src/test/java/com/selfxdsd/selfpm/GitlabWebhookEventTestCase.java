@@ -27,8 +27,11 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import javax.json.Json;
+import javax.json.JsonObject;
 
 /**
  * Unit tests for {@link GitlabWebhookEvent}.
@@ -296,7 +299,7 @@ public final class GitlabWebhookEventTestCase {
                 .add(
                     "object_attributes",
                     Json.createObjectBuilder()
-                        .add("iid", "1")
+                        .add("iid", 1)
                         .add("state", "opened")
                 ).build().toString()
         );
@@ -321,7 +324,7 @@ public final class GitlabWebhookEventTestCase {
                 .add(
                     "object_attributes",
                     Json.createObjectBuilder()
-                        .add("iid", "1")
+                        .add("iid", 1)
                         .add("state", "opened")
                 ).build().toString()
         );
@@ -351,7 +354,7 @@ public final class GitlabWebhookEventTestCase {
                 .add(
                     "issue",
                     Json.createObjectBuilder()
-                        .add("iid", "1")
+                        .add("iid", 1)
                 ).build().toString()
         );
         MatcherAssert.assertThat(
@@ -380,7 +383,7 @@ public final class GitlabWebhookEventTestCase {
                 .add(
                     "merge_request",
                     Json.createObjectBuilder()
-                        .add("iid", "1")
+                        .add("iid", 1)
                 ).build().toString()
         );
         MatcherAssert.assertThat(
@@ -431,6 +434,130 @@ public final class GitlabWebhookEventTestCase {
     }
 
     /**
+     * We can retrieve the Comment from an issue comment event.
+     */
+    @Test
+    public void returnsCommentFromIssueCommentEvent() {
+        final Project project = Mockito.mock(Project.class);
+        final Issue issue = this.mockIssue(project, "1");
+        this.mockComment(issue);
+
+        final Event gitlabEvent = new GitlabWebhookEvent(
+            project,
+            "Note Hook",
+            Json.createObjectBuilder()
+                .add(
+                    "user",
+                    Json.createObjectBuilder().add("username", "mihai")
+                ).add(
+                    "object_attributes",
+                    Json.createObjectBuilder()
+                        .add("id", 123)
+                        .add("note", "Issue comment here...")
+                        .add("noteable_type", "Issue")
+                ).add(
+                    "issue",
+                     Json.createObjectBuilder().add("iid", 1)
+                ).build().toString()
+        );
+        final Comment comment = gitlabEvent.comment();
+        MatcherAssert.assertThat(
+            comment.commentId(),
+            Matchers.equalTo("123")
+        );
+        MatcherAssert.assertThat(
+            comment.author(),
+            Matchers.equalTo("mihai")
+        );
+        MatcherAssert.assertThat(
+            comment.body(),
+            Matchers.equalTo("Issue comment here...")
+        );
+    }
+
+    /**
+     * We can retrieve the Comment from an MR comment event.
+     */
+    @Test
+    public void returnsCommentFromMergeRequestCommentEvent() {
+        final Project project = Mockito.mock(Project.class);
+        final Issue issue = this.mockIssue(project, "1");
+        this.mockComment(issue);
+
+        final Event gitlabEvent = new GitlabWebhookEvent(
+            project,
+            "Note Hook",
+            Json.createObjectBuilder()
+                .add(
+                    "user",
+                    Json.createObjectBuilder().add("username", "mihai")
+                ).add(
+                "object_attributes",
+                Json.createObjectBuilder()
+                    .add("id", 123)
+                    .add("note", "MR comment here...")
+                    .add("noteable_type", "MergeRequest")
+            ).add(
+                "merge_request",
+                Json.createObjectBuilder().add("iid", 1)
+            ).build().toString()
+        );
+        final Comment comment = gitlabEvent.comment();
+        MatcherAssert.assertThat(
+            comment.commentId(),
+            Matchers.equalTo("123")
+        );
+        MatcherAssert.assertThat(
+            comment.author(),
+            Matchers.equalTo("mihai")
+        );
+        MatcherAssert.assertThat(
+            comment.body(),
+            Matchers.equalTo("MR comment here...")
+        );
+    }
+
+    /**
+     * The comment is null if the Note Hook event is on other
+     * entities than Issue or MergeRequest.
+     */
+    @Test
+    public void commentIsNullOnOtherCommentEvent() {
+        final Event gitlabEvent = new GitlabWebhookEvent(
+            Mockito.mock(Project.class),
+            "Note Hook",
+            Json.createObjectBuilder()
+                .add(
+                    "object_attributes",
+                    Json.createObjectBuilder()
+                        .add("noteable_type", "Commit")
+                ).build().toString()
+        );
+        MatcherAssert.assertThat(
+            gitlabEvent.comment(),
+            Matchers.nullValue()
+        );
+    }
+
+    /**
+     * The comment is null if the event is not a Note Hook event.
+     */
+    @Test
+    public void commentIsNullOnOtherEvent() {
+        final Event gitlabEvent = new GitlabWebhookEvent(
+            Mockito.mock(Project.class),
+            "Other Hook",
+            Json.createObjectBuilder()
+                .build()
+                .toString()
+        );
+        MatcherAssert.assertThat(
+            gitlabEvent.comment(),
+            Matchers.nullValue()
+        );
+    }
+
+    /**
      * Mock an Issue/Merge Request for Test.
      * @param project Project where the Issue is coming from.
      * @param iid Internal ID of the Issue/MR.
@@ -457,6 +584,53 @@ public final class GitlabWebhookEventTestCase {
         Mockito.when(project.projectManager()).thenReturn(manager);
 
         return issue;
+    }
+
+    /**
+     * Mock an Issue/Merge Request for Test.
+     * @param issue Issue where the Comment has been posted.
+     */
+    public void mockComment(final Issue issue) {
+        final Comments comments = Mockito.mock(Comments.class);
+        Mockito.when(issue.comments()).thenReturn(comments);
+        Mockito.when(comments.received(Mockito.any(JsonObject.class)))
+            .thenAnswer(
+                new Answer<Comment>() {
+                    @Override
+                    public Comment answer(
+                        final InvocationOnMock invocationOnMock
+                    ) {
+                        return new Comment() {
+                            /**
+                             * JsonObject comment.
+                             */
+                            private final JsonObject json = (JsonObject)
+                                invocationOnMock.getArguments()[0];
+
+                            @Override
+                            public String commentId() {
+                                return String.valueOf(this.json.getInt("id"));
+                            }
+
+                            @Override
+                            public String author() {
+                                return this.json.getJsonObject("author")
+                                    .getString("username");
+                            }
+
+                            @Override
+                            public String body() {
+                                return this.json.getString("body");
+                            }
+
+                            @Override
+                            public JsonObject json() {
+                                return this.json;
+                            }
+                        };
+                    }
+                }
+            );
     }
 
 }

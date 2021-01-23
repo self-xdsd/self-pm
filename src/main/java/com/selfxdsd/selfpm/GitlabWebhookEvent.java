@@ -106,17 +106,24 @@ public final class GitlabWebhookEvent implements Event {
         final String iid;
         if("Issue Hook".equalsIgnoreCase(this.type)
             || "Merge Request Hook".equalsIgnoreCase(this.type)) {
-            iid = this.event.getJsonObject("object_attributes")
-                .getString("iid");
+            iid = String.valueOf(
+                this.event.getJsonObject("object_attributes")
+                    .getInt("iid")
+            );
         } else if("Note Hook".equalsIgnoreCase(this.type)) {
             final String noteableType = this.event.getJsonObject(
                 "object_attributes"
             ).getString("noteable_type", "");
             if("Issue".equalsIgnoreCase(noteableType)) {
-                iid = this.event.getJsonObject("issue").getString("iid");
+                iid = String.valueOf(
+                    this.event.getJsonObject("issue")
+                        .getInt("iid")
+                );
             } else if("MergeRequest".equalsIgnoreCase(noteableType)){
-                iid = this.event.getJsonObject("merge_request")
-                    .getString("iid");
+                iid = String.valueOf(
+                    this.event.getJsonObject("merge_request")
+                        .getInt("iid")
+                );
             } else {
                 iid = null;
             }
@@ -149,7 +156,7 @@ public final class GitlabWebhookEvent implements Event {
             if ("Issue".equalsIgnoreCase(noteableType)
                 || "MergeRequest".equalsIgnoreCase(noteableType)) {
                 jsonComment = Json.createObjectBuilder()
-                    .add("id", attributes.getString("id"))
+                    .add("id", attributes.getInt("id"))
                     .add("body", attributes.getString("note"))
                     .add(
                         "author",
