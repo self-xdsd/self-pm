@@ -53,7 +53,7 @@ public final class GitlabWebhookEventTestCase {
                 .add(
                     "object_attributes",
                     Json.createObjectBuilder()
-                        .add("state", "opened")
+                        .add("action", "open")
                 ).build().toString()
         );
         MatcherAssert.assertThat(
@@ -74,7 +74,7 @@ public final class GitlabWebhookEventTestCase {
                 .add(
                     "object_attributes",
                     Json.createObjectBuilder()
-                        .add("state", "opened")
+                        .add("action", "open")
                 ).build().toString()
         );
         MatcherAssert.assertThat(
@@ -95,7 +95,7 @@ public final class GitlabWebhookEventTestCase {
                 .add(
                     "object_attributes",
                     Json.createObjectBuilder()
-                        .add("state", "reopened")
+                        .add("action", "reopen")
                 ).build().toString()
         );
         MatcherAssert.assertThat(
@@ -116,7 +116,7 @@ public final class GitlabWebhookEventTestCase {
                 .add(
                     "object_attributes",
                     Json.createObjectBuilder()
-                        .add("state", "reopened")
+                        .add("action", "reopen")
                 ).build().toString()
         );
         MatcherAssert.assertThat(
@@ -138,7 +138,7 @@ public final class GitlabWebhookEventTestCase {
                 .add(
                     "object_attributes",
                     Json.createObjectBuilder()
-                        .add("state", "closed")
+                        .add("action", "closed")
                 ).build().toString()
         );
         MatcherAssert.assertThat(
@@ -160,7 +160,7 @@ public final class GitlabWebhookEventTestCase {
                 .add(
                     "object_attributes",
                     Json.createObjectBuilder()
-                        .add("state", "closed")
+                        .add("action", "closed")
                 ).build().toString()
         );
         MatcherAssert.assertThat(
@@ -300,7 +300,7 @@ public final class GitlabWebhookEventTestCase {
                     "object_attributes",
                     Json.createObjectBuilder()
                         .add("iid", 1)
-                        .add("state", "opened")
+                        .add("action", "open")
                 ).build().toString()
         );
         MatcherAssert.assertThat(
@@ -325,7 +325,7 @@ public final class GitlabWebhookEventTestCase {
                     "object_attributes",
                     Json.createObjectBuilder()
                         .add("iid", 1)
-                        .add("state", "opened")
+                        .add("action", "open")
                 ).build().toString()
         );
         MatcherAssert.assertThat(

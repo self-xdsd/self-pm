@@ -75,12 +75,12 @@ public final class GitlabWebhookEvent implements Event {
         final String resolved;
         if("Issue Hook".equalsIgnoreCase(this.type)
             || "Merge Request Hook".equalsIgnoreCase(this.type)) {
-            final String state = this.event.getJsonObject(
+            final String action = this.event.getJsonObject(
                 "object_attributes"
-            ).getString("state", "");
-            if(state.startsWith("open")) {
+            ).getString("action", "");
+            if("open".equalsIgnoreCase(action)) {
                 resolved = Type.NEW_ISSUE;
-            } else if (state.startsWith("reopen")) {
+            } else if ("reopen".equalsIgnoreCase(action)) {
                 resolved = Type.REOPENED_ISSUE;
             } else {
                 resolved = this.type;
