@@ -17,8 +17,8 @@
 	<properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
-        <self.core.version>0.0.57</self.core.version>
-        <self.storage.version>0.0.25</self.storage.version>
+        <self.core.version>0.0.59</self.core.version>
+        <self.storage.version>0.0.26</self.storage.version>
 	</properties>
 
 	<dependencies>
