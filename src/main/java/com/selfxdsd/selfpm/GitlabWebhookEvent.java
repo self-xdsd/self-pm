@@ -104,8 +104,12 @@ public final class GitlabWebhookEvent implements Event {
     @Override
     public Issue issue() {
         final String iid;
+        boolean mergeRequest = false;
         if("Issue Hook".equalsIgnoreCase(this.type)
             || "Merge Request Hook".equalsIgnoreCase(this.type)) {
+            if("Merge Request Hook".equalsIgnoreCase(this.type)) {
+                mergeRequest = true;
+            }
             iid = String.valueOf(
                 this.event.getJsonObject("object_attributes")
                     .getInt("iid")
@@ -124,6 +128,7 @@ public final class GitlabWebhookEvent implements Event {
                     this.event.getJsonObject("merge_request")
                         .getInt("iid")
                 );
+                mergeRequest = true;
             } else {
                 iid = null;
             }
@@ -133,10 +138,17 @@ public final class GitlabWebhookEvent implements Event {
         final Issue issue;
         if(iid != null) {
             final String repoFullName = this.project.repoFullName();
-            issue = this.project.projectManager().provider().repo(
-                repoFullName.split("/")[0],
-                repoFullName.split("/")[1]
-            ).issues().getById(iid);
+            if(mergeRequest) {
+                issue = this.project.projectManager().provider().repo(
+                    repoFullName.split("/")[0],
+                    repoFullName.split("/")[1]
+                ).pullRequests().getById(iid);
+            } else {
+                issue = this.project.projectManager().provider().repo(
+                    repoFullName.split("/")[0],
+                    repoFullName.split("/")[1]
+                ).issues().getById(iid);
+            }
         } else {
             issue = null;
         }

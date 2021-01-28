@@ -290,7 +290,7 @@ public final class GitlabWebhookEventTestCase {
     @Test
     public void returnsIssueFromIssueEvent() {
         final Project project = Mockito.mock(Project.class);
-        final Issue issue = this.mockIssue(project, "1");
+        final Issue issue = this.mockIssue(project, "1", Boolean.FALSE);
 
         final Event gitlabEvent = new GitlabWebhookEvent(
             project,
@@ -315,7 +315,7 @@ public final class GitlabWebhookEventTestCase {
     @Test
     public void returnsIssueFromMergeRequestEvent() {
         final Project project = Mockito.mock(Project.class);
-        final Issue issue = this.mockIssue(project, "1");
+        final Issue issue = this.mockIssue(project, "1", Boolean.TRUE);
 
         final Event gitlabEvent = new GitlabWebhookEvent(
             project,
@@ -340,7 +340,7 @@ public final class GitlabWebhookEventTestCase {
     @Test
     public void returnsIssueFromIssueCommentEvent() {
         final Project project = Mockito.mock(Project.class);
-        final Issue issue = this.mockIssue(project, "1");
+        final Issue issue = this.mockIssue(project, "1", Boolean.FALSE);
 
         final Event gitlabEvent = new GitlabWebhookEvent(
             project,
@@ -369,7 +369,7 @@ public final class GitlabWebhookEventTestCase {
     @Test
     public void returnsIssueFromMergeRequestCommentEvent() {
         final Project project = Mockito.mock(Project.class);
-        final Issue issue = this.mockIssue(project, "1");
+        final Issue issue = this.mockIssue(project, "1", Boolean.TRUE);
 
         final Event gitlabEvent = new GitlabWebhookEvent(
             project,
@@ -439,7 +439,7 @@ public final class GitlabWebhookEventTestCase {
     @Test
     public void returnsCommentFromIssueCommentEvent() {
         final Project project = Mockito.mock(Project.class);
-        final Issue issue = this.mockIssue(project, "1");
+        final Issue issue = this.mockIssue(project, "1", Boolean.FALSE);
         this.mockComment(issue);
 
         final Event gitlabEvent = new GitlabWebhookEvent(
@@ -481,7 +481,7 @@ public final class GitlabWebhookEventTestCase {
     @Test
     public void returnsCommentFromMergeRequestCommentEvent() {
         final Project project = Mockito.mock(Project.class);
-        final Issue issue = this.mockIssue(project, "1");
+        final Issue issue = this.mockIssue(project, "1", Boolean.TRUE);
         this.mockComment(issue);
 
         final Event gitlabEvent = new GitlabWebhookEvent(
@@ -561,15 +561,24 @@ public final class GitlabWebhookEventTestCase {
      * Mock an Issue/Merge Request for Test.
      * @param project Project where the Issue is coming from.
      * @param iid Internal ID of the Issue/MR.
+     * @param pullRequest Is it a pull request?
      * @return Issue.
      */
-    public Issue mockIssue(final Project project, final String iid) {
+    public Issue mockIssue(
+        final Project project,
+        final String iid,
+        final boolean pullRequest
+    ) {
         final Issue issue = Mockito.mock(Issue.class);
 
         final Issues all = Mockito.mock(Issues.class);
         Mockito.when(all.getById(iid)).thenReturn(issue);
         final Repo repo = Mockito.mock(Repo.class);
-        Mockito.when(repo.issues()).thenReturn(all);
+        if(pullRequest) {
+            Mockito.when(repo.pullRequests()).thenReturn(all);
+        } else {
+            Mockito.when(repo.issues()).thenReturn(all);
+        }
 
         Mockito.when(project.repoFullName()).thenReturn("mihai/test");
         final Provider gitlab = Mockito.mock(Provider.class);
