@@ -1,3 +1,5 @@
+<img alt="self-xsdsd-logo" src="https://self-xdsd.com/files/self-xdsd.png" width="80" height="80"/>
+
 ## Self Project Manager
 
 [![Build Status](https://travis-ci.org/self-xdsd/self-pm.svg?branch=master)](https://travis-ci.org/self-xdsd/self-pm)
