@@ -74,6 +74,11 @@ public final class SelfCoreComponent implements Self {
     }
 
     @Override
+    public User authenticate(final String token) {
+        return this.core.authenticate(token);
+    }
+
+    @Override
     public ProjectManagers projectManagers() {
         return this.core.projectManagers();
     }
@@ -81,11 +86,6 @@ public final class SelfCoreComponent implements Self {
     @Override
     public Projects projects() {
         return this.core.projects();
-    }
-
-    @Override
-    public PlatformInvoices platformInvoices() {
-        return this.core.platformInvoices();
     }
 
     @Override

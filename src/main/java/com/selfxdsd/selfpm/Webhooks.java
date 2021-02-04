@@ -24,6 +24,7 @@ package com.selfxdsd.selfpm;
 
 import com.selfxdsd.api.*;
 import com.selfxdsd.core.RestfulSelfTodos;
+import com.selfxdsd.core.projects.WebhookEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,7 +129,7 @@ public final class Webhooks {
                     this.selfTodos.post(project, payload);
                 } else {
                     project.resolve(
-                        new GithubWebhookEvent(project, type, payload)
+                        WebhookEvents.create(project, type, payload)
                     );
                 }
             } else {
@@ -174,7 +175,7 @@ public final class Webhooks {
                     this.selfTodos.post(project, payload);
                 } else {
                     project.resolve(
-                        new GitlabWebhookEvent(project, type, payload)
+                        WebhookEvents.create(project, type, payload)
                     );
                 }
             } else {

@@ -95,6 +95,7 @@ public final class WebhooksTestCase {
     public void githubProjectResolvesOk() {
         final Project project = Mockito.mock(Project.class);
         Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.when(project.provider()).thenReturn(Provider.Names.GITHUB);
         Mockito.doNothing()
             .when(project)
             .resolve(Mockito.any(Event.class));
@@ -124,6 +125,7 @@ public final class WebhooksTestCase {
     public void githubProjectResolvesNewIssue() {
         final Project project = Mockito.mock(Project.class);
         Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.when(project.provider()).thenReturn(Provider.Names.GITHUB);
         Mockito.doNothing()
             .when(project)
             .resolve(Mockito.any(Event.class));
@@ -162,6 +164,7 @@ public final class WebhooksTestCase {
     public void githubProjectResolvesReopenedIssue() {
         final Project project = Mockito.mock(Project.class);
         Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.when(project.provider()).thenReturn(Provider.Names.GITHUB);
         Mockito.doNothing()
             .when(project)
             .resolve(Mockito.any(Event.class));
@@ -200,6 +203,7 @@ public final class WebhooksTestCase {
     public void githubProjectResolvesOtherIssuesEvent() {
         final Project project = Mockito.mock(Project.class);
         Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.when(project.provider()).thenReturn(Provider.Names.GITHUB);
         Mockito.doNothing()
             .when(project)
             .resolve(Mockito.any(Event.class));
@@ -238,6 +242,7 @@ public final class WebhooksTestCase {
     public void githubProjectResolvesIssueCommentEvent() {
         final Project project = Mockito.mock(Project.class);
         Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.when(project.provider()).thenReturn(Provider.Names.GITHUB);
         Mockito.doNothing()
             .when(project)
             .resolve(Mockito.any(Event.class));
@@ -332,6 +337,7 @@ public final class WebhooksTestCase {
     public void gitlabWebhookForwardsPushToSelfTodos() {
         final Project project = Mockito.mock(Project.class);
         Mockito.when(project.webHookToken()).thenReturn("token123");
+        Mockito.when(project.provider()).thenReturn(Provider.Names.GITLAB);
         Mockito.doThrow(IllegalStateException.class)
             .when(project)
             .resolve(Mockito.any(Event.class));
@@ -369,6 +375,7 @@ public final class WebhooksTestCase {
     public void gitlabWebhookResolvesEvent() {
         final Project project = Mockito.mock(Project.class);
         Mockito.when(project.webHookToken()).thenReturn("token123");
+        Mockito.when(project.provider()).thenReturn(Provider.Names.GITLAB);
         final Projects all = Mockito.mock(Projects.class);
         Mockito.when(
             all.getProjectById("john/test", Provider.Names.GITLAB)
@@ -395,6 +402,6 @@ public final class WebhooksTestCase {
         Mockito.verify(
             project,
             Mockito.times(1)
-        ).resolve(Mockito.any(GitlabWebhookEvent.class));
+        ).resolve(Mockito.any(Event.class));
     }
 }
