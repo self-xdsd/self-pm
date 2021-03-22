@@ -24,6 +24,7 @@ package com.selfxdsd.selfpm;
 
 import com.selfxdsd.api.Contract;
 import com.selfxdsd.api.Invoice;
+import com.selfxdsd.api.Payment;
 import com.selfxdsd.api.Project;
 import com.selfxdsd.api.ProjectManager;
 import com.selfxdsd.api.Self;
@@ -74,6 +75,7 @@ public final class PayInvoices {
     /**
      * Every Monday the PMs should verify their Project Contract Invoices an
      * try to pay the ones that are eligible.
+     * @checkstyle IllegalCatch (50 lines)
      */
     @Scheduled(cron = EVERY_MONDAY)
     public void payInvoices() {
@@ -83,7 +85,9 @@ public final class PayInvoices {
                 final Wallet wallet = project.wallet();
                 for(final Contract contact: project.contracts()){
                     for(final Invoice invoice: contact.invoices()){
-                        if (!invoice.isPaid()) {
+                        if (!invoice.isPaid()
+                            && invoice.totalAmount()
+                            .longValueExact() >= 108 * 100) {
                             LOG.debug(
                                 manager.username()
                                     + " is trying to pay invoice #"
@@ -91,7 +95,21 @@ public final class PayInvoices {
                                     + " for contract: "
                                     + contact.contractId()
                             );
-                            wallet.pay(invoice);
+                            try {
+                                final Payment payment = wallet.pay(invoice);
+                                LOG.debug("Payment finished with status: "
+                                    + payment.status()
+                                    + "(" + payment.failReason() + ")");
+                            } catch (final Exception exception) {
+                                LOG.error(
+                                    "Payment failed due to an unexpected "
+                                        + "error: "
+                                        + exception.getClass()
+                                        .getSimpleName()
+                                        + "(" + exception.getMessage() + ")"
+                                );
+                            }
+                            break;
                         }
                     }
                 }
