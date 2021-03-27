@@ -33,11 +33,19 @@ import com.selfxdsd.api.ProjectManagers;
 import com.selfxdsd.api.Projects;
 import com.selfxdsd.api.Self;
 import com.selfxdsd.api.Wallet;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.scheduling.TriggerContext;
+import org.springframework.scheduling.support.CronTrigger;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Unit tests for {@link PayInvoices}.
@@ -48,6 +56,36 @@ import java.util.Arrays;
  * @checkstyle ExecutableStatementCount (500 lines)
  */
 public final class PayInvoicesTestCase {
+
+    /**
+     * Cron is triggered every Monday at midnight.
+     */
+    @Test
+    public void triggersEveryMondayAtMidnight(){
+        final CronTrigger cron = new CronTrigger(PayInvoices.EVERY_MONDAY,
+            TimeZone.getTimeZone("UTC"));
+        final TriggerContext context = Mockito.mock(TriggerContext.class);
+        final Date lastTrigger = Date.from(
+            LocalDateTime
+                .of(2021, 3, 22, 0, 0)
+                .toInstant(ZoneOffset.UTC)
+        );
+        Mockito.when(context.lastActualExecutionTime())
+            .thenReturn(lastTrigger);
+        Mockito.when(context.lastCompletionTime())
+            .thenReturn(lastTrigger);
+        Mockito.when(context.lastScheduledExecutionTime())
+            .thenReturn(lastTrigger);
+
+        final Date nextTrigger = cron.nextExecutionTime(context);
+        final Date expected = Date.from(
+            LocalDateTime
+                .of(2021, 3, 29, 0, 0)
+                .toInstant(ZoneOffset.UTC)
+        );
+
+        MatcherAssert.assertThat(nextTrigger, Matchers.equalTo(expected));
+    }
 
     /**
      * It should successfully pay an active invoice.

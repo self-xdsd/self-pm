@@ -49,7 +49,7 @@ public final class PayInvoices {
     /**
      * The PMs will verify unpaid invoices and try to pay them every MONDAY.
      */
-    private static final String EVERY_MONDAY = "0 0 * * MON";
+    static final String EVERY_MONDAY = "0 0 0 ? * MON";
 
     /**
      * Logger.
