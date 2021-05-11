@@ -67,7 +67,7 @@ public final class ReviewAssignedTasks {
     }
 
     /**
-     * Every 6 hours the PMs should verify their assigned tasks.
+     * Every 30 minutes the PMs should verify their assigned tasks.
      */
     @Scheduled(fixedRateString = EVERY_30_MINUTES)
     public void reviewAssignedTasks() {
