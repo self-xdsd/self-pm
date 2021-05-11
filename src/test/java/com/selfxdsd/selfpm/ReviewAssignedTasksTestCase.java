@@ -23,9 +23,12 @@
 package com.selfxdsd.selfpm;
 
 import com.selfxdsd.api.*;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -137,6 +140,17 @@ public final class ReviewAssignedTasksTestCase {
             final Project project = mocks.get(idx);
             Mockito.verify(project, Mockito.times(1)).resolve(Mockito.any());
         }
+    }
+
+    /**
+     * Review period has correct format.
+     */
+    @Test
+    public void reviewPeriodHasCorrectFormat() {
+        MatcherAssert.assertThat(
+            Duration.parse(ReviewAssignedTasks.EVERY_30_MINUTES),
+            Matchers.equalTo(Duration.ofMinutes(30))
+        );
     }
 
 }

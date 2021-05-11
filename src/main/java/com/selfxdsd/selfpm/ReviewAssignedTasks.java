@@ -43,7 +43,7 @@ public final class ReviewAssignedTasks {
     /**
      * The PMs will review the assigned tasks every 6 hours.
      */
-    private static final int EVERY_6_HOURS = 21600000;
+    static final String EVERY_30_MINUTES = "PT30M";
 
     /**
      * Logger.
@@ -69,7 +69,7 @@ public final class ReviewAssignedTasks {
     /**
      * Every 6 hours the PMs should verify their assigned tasks.
      */
-    @Scheduled(fixedRate = EVERY_6_HOURS)
+    @Scheduled(fixedRateString = EVERY_30_MINUTES)
     public void reviewAssignedTasks() {
         LOG.debug("PMs reviewing their assigned tasks...");
         for(final ProjectManager manager : this.selfCore.projectManagers()) {
