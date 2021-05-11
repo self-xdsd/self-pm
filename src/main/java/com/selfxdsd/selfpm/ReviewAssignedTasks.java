@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 public final class ReviewAssignedTasks {
 
     /**
-     * The PMs will review the assigned tasks every 6 hours.
+     * The PMs will review the assigned tasks every 30 minnutes.
      */
     static final String EVERY_30_MINUTES = "PT30M";
 
