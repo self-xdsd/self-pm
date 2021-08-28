@@ -116,6 +116,14 @@ public final class ReviewUnassignedTasks {
                             }
 
                             @Override
+                            public String repoNewName() {
+                                throw new UnsupportedOperationException(
+                                    "No Repo new name in the "
+                                    + Type.UNASSIGNED_TASKS + " event."
+                                );
+                            }
+
+                            @Override
                             public Project project() {
                                 return project;
                             }

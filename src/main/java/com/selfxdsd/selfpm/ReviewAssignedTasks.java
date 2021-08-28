@@ -95,7 +95,7 @@ public final class ReviewAssignedTasks {
                             public Issue issue() {
                                 throw new UnsupportedOperationException(
                                     "No Issue in the " + Type.ASSIGNED_TASKS
-                                        + " event."
+                                    + " event."
                                 );
                             }
 
@@ -112,6 +112,14 @@ public final class ReviewAssignedTasks {
                                 throw new UnsupportedOperationException(
                                     "No Commit in the " + Type.ASSIGNED_TASKS
                                     + " event."
+                                );
+                            }
+
+                            @Override
+                            public String repoNewName() {
+                                throw new UnsupportedOperationException(
+                                    "No Repo new name in the "
+                                    + Type.ASSIGNED_TASKS + " event."
                                 );
                             }
 
