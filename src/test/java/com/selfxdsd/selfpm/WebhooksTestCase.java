@@ -30,6 +30,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 
+import javax.json.Json;
+
 /**
  * Unit tests for {@link Webhooks}.
  * @author Mihai Andronache (amihaiemil@gmail.com)
@@ -52,8 +54,19 @@ public final class WebhooksTestCase {
         Mockito.when(self.projects()).thenReturn(all);
         final Webhooks hook = new Webhooks(self);
         MatcherAssert.assertThat(
-            hook.github("john", "test", "issues", "90sdwdf8w9", "payload")
-                .getStatusCode(),
+            hook.github(
+                "john",
+                "test",
+                "issues",
+                "90sdwdf8w9",
+                Json.createObjectBuilder()
+                    .add("action", "open")
+                    .add(
+                        "repository",
+                        Json.createObjectBuilder()
+                            .add("full_name", "john/test")
+                    ).build().toString()
+            ).getStatusCode(),
             Matchers.equalTo(HttpStatus.NO_CONTENT)
         );
     }
@@ -82,7 +95,7 @@ public final class WebhooksTestCase {
                 "test",
                 "issues",
                 "bad5aaa92d16d7b03dbd25bba34053bd3c3ef",
-                "{\"json\":\"payload\"}"
+                "{\"repository\":{\"full_name\":\"john/test\"}}"
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.BAD_REQUEST)
         );
@@ -111,8 +124,8 @@ public final class WebhooksTestCase {
                 "john",
                 "test",
                 "issues",
-                "sha1=9317695aaa92d16d7b03dbd25bba34053bd3c3ef",
-                "{\"json\":\"payload\"}"
+                "sha1=853a76e61f8c83758a25641a7018ef6ba1a757e8",
+                "{\"repository\":{\"full_name\":\"john/test\"}}"
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.OK)
         );
@@ -141,8 +154,15 @@ public final class WebhooksTestCase {
                 "john",
                 "test",
                 "issues",
-                "sha1=900ac3dbf2d5f8d4923c1d65615289763689ef93",
-                "{\"action\":\"opened\"}"
+                "sha1=e0649975c486f8f5ba5f16c9d9b1a811bea7120d",
+                Json.createObjectBuilder()
+                    .add("action", "opened")
+                    .add(
+                        "repository",
+                        Json.createObjectBuilder()
+                            .add("full_name", "john/test")
+                    ).build()
+                    .toString()
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.OK)
         );
@@ -180,8 +200,15 @@ public final class WebhooksTestCase {
                 "john",
                 "test",
                 "issues",
-                "sha1=5ad785edd6a587a36fc5f687eeb6780b6bc1199d",
-                "{\"action\":\"reopened\"}"
+                "sha1=a35fac5121c90f48672ed2701746631877964f62",
+                Json.createObjectBuilder()
+                    .add("action", "reopened")
+                    .add(
+                        "repository",
+                        Json.createObjectBuilder()
+                            .add("full_name", "john/test")
+                    ).build()
+                    .toString()
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.OK)
         );
@@ -219,8 +246,15 @@ public final class WebhooksTestCase {
                 "john",
                 "test",
                 "issues",
-                "sha1=e07549de7e41046bba98fdd5cd02b38990b114f3",
-                "{\"action\":\"other\"}"
+                "sha1=69cff7d288f62021738c8b0e75ffdac025a13ab6",
+                Json.createObjectBuilder()
+                    .add("action", "other")
+                    .add(
+                        "repository",
+                        Json.createObjectBuilder()
+                            .add("full_name", "john/test")
+                    ).build()
+                    .toString()
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.OK)
         );
@@ -258,8 +292,15 @@ public final class WebhooksTestCase {
                 "john",
                 "test",
                 "issue_comment",
-                "sha1=9a4f065f84a3a28d68aad1b40bd946f79fe6d588",
-                "{\"action\":\"edited\"}"
+                "sha1=9d2e4ddc3d7c8f1709862427f5089889e2b09f07",
+                Json.createObjectBuilder()
+                    .add("action", "edited")
+                    .add(
+                        "repository",
+                        Json.createObjectBuilder()
+                            .add("full_name", "john/test")
+                    ).build()
+                    .toString()
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.OK)
         );
@@ -293,7 +334,14 @@ public final class WebhooksTestCase {
                 "test",
                 "Push Hook",
                 "90sdwdf8w9",
-                "payload"
+                Json.createObjectBuilder()
+                    .add("action", "opened")
+                    .add(
+                        "repository",
+                        Json.createObjectBuilder()
+                            .add("full_name", "john/test")
+                    ).build()
+                    .toString()
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.NO_CONTENT)
         );
@@ -323,7 +371,13 @@ public final class WebhooksTestCase {
                 "test",
                 "Push Hook",
                 "token123456789",
-                "{\"json\":\"payload\"}"
+                Json.createObjectBuilder()
+                    .add(
+                        "repository",
+                        Json.createObjectBuilder()
+                            .add("full_name", "john/test")
+                    ).build()
+                    .toString()
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.BAD_REQUEST)
         );
@@ -395,7 +449,7 @@ public final class WebhooksTestCase {
                 "test",
                 "Issue Comment",
                 "token123",
-                "{\"json\":\"payload\"}"
+                "{\"repository\":{\"full_name\":\"john/test\"}}"
             ).getStatusCode(),
             Matchers.equalTo(HttpStatus.OK)
         );
