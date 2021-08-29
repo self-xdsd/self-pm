@@ -95,19 +95,14 @@ public final class Webhooks {
 
     /**
      * Webhook for Github projects.
-     * @param owner Owner's username (can be a user or organization name).
+     * @param owner Owner's username (can be a user or an organization name).
      * @param name Repo's name.
      * @param type Event type.
      * @param signature Signature sent by Github.
      * @param payload JSON Payload.
      * @return ResponseEntity.
      * @checkstyle ReturnCount (150 lines)
-     * @todo #118:60min We now read the repoFullName from the event payload. We
-     *  cannot rely on input owner and name because the repo's name may
-     *  change and we cannot update the Webhook when this happens.
-     *  Remove the owner and name from this endpoint as they are not
-     *  needed anymore. This first requires changes in the way self-core is
-     *  setting up the webhook.
+     * @checkstyle ExecutableStatementCount (150 lines)
      * @todo #118:120min Update the signature calculation based on the new
      *  X-Github-Signature-256 header, as described here:
      *  https://docs.github.com/en/developers/webhooks-and-events/webhooks
@@ -124,44 +119,63 @@ public final class Webhooks {
         final @RequestHeader("X-Hub-Signature") String signature,
         final @RequestBody String payload
     ) {
-        final JsonObject repository = Json.createReader(
-            new StringReader(payload)
-        ).readObject().getJsonObject("repository");
-        if(repository == null) {
-            return ResponseEntity.badRequest().build();
-        } else {
-            final String repoFullName = repository.getString("full_name");
-            LOG.debug(
-                "Received Github Webhook [" + type + "] from Repo "
-                + repoFullName.split("/")[0] + "/"
-                + repoFullName.split("/")[1] + ". "
-            );
-            final Project project = this.selfCore.projects().getProjectById(
-                repoFullName,
-                Provider.Names.GITHUB
-            );
-            if (project != null) {
-                final String calculated = this.hmacHexDigest(
-                    project.webHookToken(),
-                    payload
-                );
-                if(calculated != null && calculated.equals(signature)) {
-                    if("push".equalsIgnoreCase(type)) {
-                        this.selfTodos.post(project, payload);
-                    } else {
-                        project.resolve(
-                            WebhookEvents.create(project, type, payload)
-                        );
-                    }
-                } else {
-                    System.out.println("CALCULATED: " + calculated);
-                    return ResponseEntity.badRequest().build();
-                }
+        LOG.debug(
+            "Received Github Webhook [" + type + "] from Repo "
+            + owner + "/" + name + ". "
+        );
+        Project project = this.selfCore.projects().getProjectById(
+            owner + "/" + name,
+            Provider.Names.GITHUB
+        );
+        if(project == null) {
+            LOG.debug("Project not found, trying repository.full_name.");
+            final JsonObject repository = Json.createReader(
+                new StringReader(payload)
+            ).readObject().getJsonObject("repository");
+            if (repository == null) {
+                LOG.debug("repository object not found, bad request.");
+                return ResponseEntity.badRequest().build();
             } else {
-                return ResponseEntity.noContent().build();
+                final String fullName = repository.getString("full_name");
+                LOG.debug("Found full_name " + fullName + "... ");
+                project = this.selfCore.projects().getProjectById(
+                    fullName,
+                    Provider.Names.GITHUB
+                );
+                if (project == null) {
+                    LOG.debug(
+                        "Project " + fullName + " not found either. No Content."
+                    );
+                    return ResponseEntity.noContent().build();
+                }
             }
-            return ResponseEntity.ok().build();
         }
+        LOG.debug(
+            "Found Project " + project.repoFullName()
+            + ". Calculating signature..."
+        );
+        final String calculated = this.hmacHexDigest(
+            project.webHookToken(),
+            payload
+        );
+        if(calculated != null && calculated.equals(signature)) {
+            LOG.debug("Signature OK.");
+            if("push".equalsIgnoreCase(type)) {
+                LOG.debug("POSTing push event to SelfTodos...");
+                this.selfTodos.post(project, payload);
+                LOG.debug("Successfully posted.");
+            } else {
+                LOG.debug("Resolving webhook event...");
+                project.resolve(
+                    WebhookEvents.create(project, type, payload)
+                );
+                LOG.debug("Event successfully resolved.");
+            }
+        } else {
+            LOG.debug("Signature doesn't match. Bad Request.");
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     /**
