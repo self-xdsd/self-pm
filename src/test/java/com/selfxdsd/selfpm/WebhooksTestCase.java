@@ -458,4 +458,105 @@ public final class WebhooksTestCase {
             Mockito.times(1)
         ).resolve(Mockito.any(Event.class));
     }
+
+    /**
+     * A Github project resolves ok, but the Project is not found by the initial
+     * input, it's found by the full_name from the payload.
+     */
+    @Test
+    public void githubProjectResolvesOkFoundByFullName() {
+        final Project project = Mockito.mock(Project.class);
+        Mockito.when(project.repoFullName()).thenReturn("john/newName");
+        Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.when(project.provider()).thenReturn(Provider.Names.GITHUB);
+        Mockito.doNothing()
+            .when(project)
+            .resolve(Mockito.any(Event.class));
+        final Projects all = Mockito.mock(Projects.class);
+        Mockito.when(
+            all.getProjectById("john/test", Provider.Names.GITHUB)
+        ).thenReturn(null);
+        Mockito.when(
+            all.getProjectById("john/newName", Provider.Names.GITHUB)
+        ).thenReturn(project);
+        final Self self = Mockito.mock(Self.class);
+        Mockito.when(self.projects()).thenReturn(all);
+        final Webhooks hook = new Webhooks(self);
+        MatcherAssert.assertThat(
+            hook.github(
+                "john",
+                "test",
+                "issues",
+                "sha1=3af1d9e7033bccac6c22cd4c6f2844f233d73794",
+                "{\"repository\":{\"full_name\":\"john/newName\"}}"
+            ).getStatusCode(),
+            Matchers.equalTo(HttpStatus.OK)
+        );
+    }
+
+    /**
+     * A Github event is received, but the Project is not found by the initial
+     * input. It is also not found by the full_name from the payload.
+     */
+    @Test
+    public void githubProjectNotFoundByFullName() {
+        final Project project = Mockito.mock(Project.class);
+        Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.when(project.provider()).thenReturn(Provider.Names.GITHUB);
+        Mockito.doNothing()
+            .when(project)
+            .resolve(Mockito.any(Event.class));
+        final Projects all = Mockito.mock(Projects.class);
+        Mockito.when(
+            all.getProjectById("john/test", Provider.Names.GITHUB)
+        ).thenReturn(null);
+        Mockito.when(
+            all.getProjectById("john/newName", Provider.Names.GITHUB)
+        ).thenReturn(null);
+        final Self self = Mockito.mock(Self.class);
+        Mockito.when(self.projects()).thenReturn(all);
+        final Webhooks hook = new Webhooks(self);
+        MatcherAssert.assertThat(
+            hook.github(
+                "john",
+                "test",
+                "issues",
+                "sha1=3af1d9e7033bccac6c22cd4c6f2844f233d73794",
+                "{\"repository\":{\"full_name\":\"john/newName\"}}"
+            ).getStatusCode(),
+            Matchers.equalTo(HttpStatus.NO_CONTENT)
+        );
+    }
+
+    /**
+     * A Github webhook event is received and the Project is not found using the
+     * input values. We try to get the full_name from the repository object in
+     * the payload, but it is missing.
+     */
+    @Test
+    public void githubProjectMissingRepositoryElement() {
+        final Project project = Mockito.mock(Project.class);
+        Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.when(project.provider()).thenReturn(Provider.Names.GITHUB);
+        Mockito.doNothing()
+            .when(project)
+            .resolve(Mockito.any(Event.class));
+        final Projects all = Mockito.mock(Projects.class);
+        Mockito.when(
+            all.getProjectById("john/test", Provider.Names.GITHUB)
+        ).thenReturn(null);
+        final Self self = Mockito.mock(Self.class);
+        Mockito.when(self.projects()).thenReturn(all);
+        final Webhooks hook = new Webhooks(self);
+        MatcherAssert.assertThat(
+            hook.github(
+                "john",
+                "test",
+                "issues",
+                "sha1=3af1d9e7033bccac6c22cd4c6f2844f233d73794",
+                "{}"
+            ).getStatusCode(),
+            Matchers.equalTo(HttpStatus.BAD_REQUEST)
+        );
+    }
 }
