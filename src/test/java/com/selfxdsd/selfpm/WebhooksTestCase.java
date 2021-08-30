@@ -559,4 +559,49 @@ public final class WebhooksTestCase {
             Matchers.equalTo(HttpStatus.BAD_REQUEST)
         );
     }
+
+    /**
+     * A Github project resolves ok, but the Project is not found by the initial
+     * input, it's found, in case of 1st time rename event, by extracting the
+     * name from "changes" object and owner name from "repository" object.
+     */
+    @Test
+    public void githubProjectResolvesOkFoundFromChanges() {
+        final Project project = Mockito.mock(Project.class);
+        Mockito.when(project.repoFullName()).thenReturn("john/test");
+        Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.when(project.provider()).thenReturn(Provider.Names.GITHUB);
+        Mockito.doNothing()
+            .when(project)
+            .resolve(Mockito.any(Event.class));
+        final Projects all = Mockito.mock(Projects.class);
+        Mockito.when(
+            all.getProjectById("john/test", Provider.Names.GITHUB)
+        ).thenReturn(project);
+        final Self self = Mockito.mock(Self.class);
+        Mockito.when(self.projects()).thenReturn(all);
+        final Webhooks hook = new Webhooks(self);
+        MatcherAssert.assertThat(
+            hook.github(
+                "other",
+                "test",
+                "issues",
+                "sha1=4be0a65f59eabfda2b7030639d822dea957dccd0",
+                Json.createObjectBuilder()
+                    .add("changes", Json.createObjectBuilder()
+                        .add("repository", Json.createObjectBuilder()
+                            .add("name", Json
+                                .createObjectBuilder()
+                                .add("from", "test"))))
+                    .add("repository", Json
+                        .createObjectBuilder()
+                        .add("owner", Json.createObjectBuilder()
+                            .add("login", "john"))
+                        .add("full_name", "john/reName"))
+                    .build()
+                    .toString()
+            ).getStatusCode(),
+            Matchers.equalTo(HttpStatus.OK)
+        );
+    }
 }

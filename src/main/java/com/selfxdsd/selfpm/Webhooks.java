@@ -129,9 +129,11 @@ public final class Webhooks {
         );
         if(project == null) {
             LOG.debug("Project not found, trying repository.full_name.");
-            final JsonObject repository = Json.createReader(
+            final JsonObject jsonPayload = Json.createReader(
                 new StringReader(payload)
-            ).readObject().getJsonObject("repository");
+            ).readObject();
+            final JsonObject repository = jsonPayload
+                .getJsonObject("repository");
             if (repository == null) {
                 LOG.debug("repository object not found, bad request.");
                 return ResponseEntity.badRequest().build();
@@ -143,10 +145,20 @@ public final class Webhooks {
                     Provider.Names.GITHUB
                 );
                 if (project == null) {
-                    LOG.debug(
-                        "Project " + fullName + " not found either. No Content."
+                    LOG.debug("Project not found, trying changes.repository");
+                    final String fullNameRenamed = this
+                        .getFullNameFromChanges(jsonPayload);
+                    project = this.selfCore.projects().getProjectById(
+                        fullNameRenamed,
+                        Provider.Names.GITHUB
                     );
-                    return ResponseEntity.noContent().build();
+                    if(project == null) {
+                        LOG.debug(
+                            "Project " + fullName + " not found either."
+                                + " No Content."
+                        );
+                        return ResponseEntity.noContent().build();
+                    }
                 }
             }
         }
@@ -248,5 +260,31 @@ public final class Webhooks {
         } catch (final NoSuchAlgorithmException | InvalidKeyException ex) {
             return null;
         }
+    }
+
+    /**
+     * Get project's full name using repo name from payload's
+     * "changes.repository.name" object and
+     * owner from payload's "repository.owner" object.
+     * @param payload JSON payload.
+     * @return Full name or null if not found.
+     */
+    private String getFullNameFromChanges(final JsonObject payload) {
+        final String fullName;
+        final JsonObject changes = payload.getJsonObject("changes");
+        if (changes != null) {
+            final String name = changes
+                .getJsonObject("repository")
+                .getJsonObject("name")
+                .getString("from");
+            final String owner = payload
+                .getJsonObject("repository")
+                .getJsonObject("owner")
+                .getString("login");
+            fullName = owner + "/" + name;
+        } else {
+            fullName = null;
+        }
+        return fullName;
     }
 }
