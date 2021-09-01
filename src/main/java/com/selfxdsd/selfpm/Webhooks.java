@@ -107,8 +107,6 @@ public final class Webhooks {
      *  X-Github-Signature-256 header, as described here:
      *  https://docs.github.com/en/developers/webhooks-and-events/webhooks
      *  /securing-your-webhooks#validating-payloads-from-github
-     * @todo #125:30min Write unit test(s) to cover case when repository is
-     *  not found in payload's "changes.repository" mapping.
      */
     @PostMapping(
         value = "/github/{owner}/{name}",
@@ -133,11 +131,11 @@ public final class Webhooks {
             final JsonObject jsonPayload = Json.createReader(
                 new StringReader(payload)
             ).readObject();
-            LOG.debug("Project not found, trying changes.repository");
-            final String fullNameChanged = this
+            LOG.debug("Project not found, trying changes.repository.name.from");
+            final String oldFullName = this
                 .getFullNameFromChanges(jsonPayload);
             project = this.selfCore.projects().getProjectById(
-                fullNameChanged,
+                oldFullName,
                 Provider.Names.GITHUB
             );
             if (project == null) {
@@ -267,19 +265,22 @@ public final class Webhooks {
 
     /**
      * Get project's full name using repo name from payload's
-     * "changes.repository.name" object and
+     * "changes.repository.name.from" object and
      * owner from payload's "repository.owner" object.
      * @param payload JSON payload.
      * @return Full name or null if not found.
+     * @checkstyle AvoidInlineConditionals (50 lines)
      */
     private String getFullNameFromChanges(final JsonObject payload) {
         final String fullName;
         final JsonObject changes = payload.getJsonObject("changes");
-        if (changes != null) {
-            final String name = changes
-                .getJsonObject("repository")
-                .getJsonObject("name")
-                .getString("from");
+        final JsonObject changesInRepo = changes != null
+            ? changes.getJsonObject("repository") : null;
+        final JsonObject repoNameChanged = changesInRepo != null
+            ? changesInRepo.getJsonObject("name") : null;
+        final String name = repoNameChanged != null
+            ? repoNameChanged.getString("from", null) : null;
+        if (name != null) {
             final String owner = payload
                 .getJsonObject("repository")
                 .getJsonObject("owner")
