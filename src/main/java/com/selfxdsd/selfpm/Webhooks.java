@@ -107,6 +107,8 @@ public final class Webhooks {
      *  X-Github-Signature-256 header, as described here:
      *  https://docs.github.com/en/developers/webhooks-and-events/webhooks
      *  /securing-your-webhooks#validating-payloads-from-github
+     * @todo #125:30min Write unit test(s) to cover case when repository is
+     *  not found in payload's "changes.repository" mapping.
      */
     @PostMapping(
         value = "/github/{owner}/{name}",
@@ -128,31 +130,32 @@ public final class Webhooks {
             Provider.Names.GITHUB
         );
         if(project == null) {
-            LOG.debug("Project not found, trying repository.full_name.");
             final JsonObject jsonPayload = Json.createReader(
                 new StringReader(payload)
             ).readObject();
-            final JsonObject repository = jsonPayload
-                .getJsonObject("repository");
-            if (repository == null) {
-                LOG.debug("repository object not found, bad request.");
-                return ResponseEntity.badRequest().build();
-            } else {
-                final String fullName = repository.getString("full_name");
-                LOG.debug("Found full_name " + fullName + "... ");
-                project = this.selfCore.projects().getProjectById(
-                    fullName,
-                    Provider.Names.GITHUB
-                );
-                if (project == null) {
-                    LOG.debug("Project not found, trying changes.repository");
-                    final String fullNameRenamed = this
-                        .getFullNameFromChanges(jsonPayload);
+            LOG.debug("Project not found, trying changes.repository");
+            final String fullNameChanged = this
+                .getFullNameFromChanges(jsonPayload);
+            project = this.selfCore.projects().getProjectById(
+                fullNameChanged,
+                Provider.Names.GITHUB
+            );
+            if (project == null) {
+                LOG.debug("Project not found, trying repository.full_name.");
+                final JsonObject repository = jsonPayload
+                    .getJsonObject("repository");
+                if (repository == null) {
+                    LOG.debug("repository object not found, bad request.");
+                    return ResponseEntity.badRequest().build();
+                } else {
+                    final String fullName = repository
+                        .getString("full_name");
+                    LOG.debug("Found full_name " + fullName + "... ");
                     project = this.selfCore.projects().getProjectById(
-                        fullNameRenamed,
+                        fullName,
                         Provider.Names.GITHUB
                     );
-                    if(project == null) {
+                    if (project == null) {
                         LOG.debug(
                             "Project " + fullName + " not found either."
                                 + " No Content."
