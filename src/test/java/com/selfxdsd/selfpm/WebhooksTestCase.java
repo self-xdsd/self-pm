@@ -604,4 +604,48 @@ public final class WebhooksTestCase {
             Matchers.equalTo(HttpStatus.OK)
         );
     }
+
+    /**
+     * The Github payload contains the changes element, but it's not related
+     * to renaming, so finally the name is taken from the repository element.
+     */
+    @Test
+    public void githubProjectResolvesOkFoundFromRepositoryOtherChanges() {
+        final Project project = Mockito.mock(Project.class);
+        Mockito.when(project.repoFullName()).thenReturn("john/test");
+        Mockito.when(project.webHookToken()).thenReturn("project_wh_token");
+        Mockito.when(project.provider()).thenReturn(Provider.Names.GITHUB);
+        Mockito.doNothing()
+            .when(project)
+            .resolve(Mockito.any(Event.class));
+        final Projects all = Mockito.mock(Projects.class);
+        Mockito.when(
+            all.getProjectById("john/test", Provider.Names.GITHUB)
+        ).thenReturn(project);
+        final Self self = Mockito.mock(Self.class);
+        Mockito.when(self.projects()).thenReturn(all);
+        final Webhooks hook = new Webhooks(self);
+        MatcherAssert.assertThat(
+            hook.github(
+                "other",
+                "test",
+                "issues",
+                "sha1=5325927cb20b66ecc567290a8136e873beb4d5bb",
+                Json.createObjectBuilder()
+                    .add("changes", Json.createObjectBuilder()
+                        .add("repository", Json.createObjectBuilder()
+                            .add("ownership", Json
+                                .createObjectBuilder()
+                                .add("owner", "vlad"))))
+                    .add("repository", Json
+                        .createObjectBuilder()
+                        .add("owner", Json.createObjectBuilder()
+                        .add("login", "john"))
+                        .add("full_name", "john/test"))
+                    .build()
+                    .toString()
+            ).getStatusCode(),
+            Matchers.equalTo(HttpStatus.OK)
+        );
+    }
 }
