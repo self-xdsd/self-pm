@@ -28,6 +28,7 @@ import com.selfxdsd.core.SelfCore;
 import com.selfxdsd.storage.MySql;
 import com.selfxdsd.storage.SelfJooq;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.RequestScope;
 
 /**
  * Self Core component.
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Component;
  * @since 0.0.4
  */
 @Component
+@RequestScope
 public final class SelfCoreComponent implements Self {
 
     /**
