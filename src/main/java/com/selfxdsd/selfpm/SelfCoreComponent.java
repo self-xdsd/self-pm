@@ -35,10 +35,11 @@ import org.springframework.web.context.annotation.RequestScope;
  * @author Mihai Andronache (amihaiemil@gmail.com)
  * @version $Id$
  * @since 0.0.4
+ * @checkstyle DesignForExtension (1000 lines)
  */
 @Component
 @RequestScope
-public final class SelfCoreComponent implements Self {
+public class SelfCoreComponent implements Self {
 
     /**
      * Self's core.
