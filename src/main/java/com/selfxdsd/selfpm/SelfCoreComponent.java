@@ -28,18 +28,15 @@ import com.selfxdsd.core.SelfCore;
 import com.selfxdsd.storage.MySql;
 import com.selfxdsd.storage.SelfJooq;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.RequestScope;
 
 /**
  * Self Core component.
  * @author Mihai Andronache (amihaiemil@gmail.com)
  * @version $Id$
  * @since 0.0.4
- * @checkstyle DesignForExtension (1000 lines)
  */
 @Component
-@RequestScope
-public class SelfCoreComponent implements Self {
+public final class SelfCoreComponent implements Self {
 
     /**
      * Self's core.
