@@ -2,7 +2,6 @@
 
 ## Self Project Manager
 
-[![Build Status](https://travis-ci.com/self-xdsd/self-pm.svg?branch=master)](https://travis-ci.com/self-xdsd/self-pm)
 [![Coverage Status](https://coveralls.io/repos/github/self-xdsd/self-pm/badge.svg?branch=master)](https://coveralls.io/github/self-xdsd/self-pm?branch=master)
 
 [![Managed By Self XDSD](https://docs.self-xdsd.com/img/mbself.svg)](https://self-xdsd.com/p/self-xdsd/self-pm?provider=github) 
